@@ -21,6 +21,18 @@ export function formatManagerAlert(lead, scoring, ragSources = []) {
     .join("\n");
 }
 
+export function formatIntakeAlert(lead) {
+  return [
+    "New intake lead",
+    `Name: ${lead.name || "Unknown"}`,
+    `School/project: ${lead.school || "Not provided"}`,
+    `Contact: ${lead.contact || "Not provided"}`,
+    `Need: ${lead.need || "Lead qualification"}`,
+    "Status: waiting for qualification answers",
+    "Next action: continue qualification in Telegram.",
+  ].join("\n");
+}
+
 export function formatClientReply(scoring) {
   if (scoring.score === "hot") {
     return "Thanks. I have enough context to route this as a priority request. A manager should contact you with available call slots.";

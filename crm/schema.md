@@ -17,8 +17,8 @@ Production target: Google Sheets with the same columns.
 | `format` | Preferred learning format |
 | `budget` | Budget/payment readiness |
 | `contactTime` | Convenient manager contact time |
-| `score` | `hot`, `warm`, or `cold` |
+| `score` | `pending`, `hot`, `warm`, or `cold` |
 | `points` | 0-100 scoring value |
-| `status` | Lead state, starts as `new` |
+| `status` | Lead state, starts as `intake`, then `new` after qualification |
 | `nextAction` | Manager action suggested by scoring |
 | `source` | `landing_form`, `telegram_bot`, etc. |

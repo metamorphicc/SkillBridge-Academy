@@ -14,7 +14,8 @@ Lead qualification bot for the SkillBridge Academy automation case.
   4. preferred format
   5. budget/readiness
   6. convenient contact time
-- Lead score: `hot`, `warm`, or `cold`
+- Landing intake status: `pending`
+- Qualified lead score after bot answers: `hot`, `warm`, or `cold`
 - Local CRM fallback: `crm/leads.local.csv` and `crm/leads.local.json`
 - Manager Telegram alert when `ADMIN_CHAT_ID` is configured
 - n8n webhook delivery when `N8N_LEAD_WEBHOOK_URL` is configured

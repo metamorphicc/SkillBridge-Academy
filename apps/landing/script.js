@@ -71,6 +71,14 @@
       telegramTitle: "New cold lead",
       telegramAction: "Next: send helpful intro material",
     },
+    intake: {
+      title: "Intake captured",
+      label: "Intake",
+      className: "score--intake",
+      action: "Continue Telegram qualification",
+      telegramTitle: "New intake captured",
+      telegramAction: "Next: ask goal, level, start, format, and budget",
+    },
   };
 
   const setText = (id, value) => {
@@ -122,8 +130,21 @@
 
   const requestForm = document.getElementById("request-form");
   const requestStatus = document.getElementById("request-status");
+  const submitResult = document.getElementById("submit-result");
 
   if (requestForm && requestStatus) {
+    const submitButton = requestForm.querySelector('button[type="submit"]');
+    const hideRequestStatus = () => {
+      requestStatus.hidden = true;
+      requestStatus.textContent = "";
+      requestStatus.classList.remove("is-error", "is-success");
+    };
+    const showRequestStatus = (message, className = "") => {
+      requestStatus.hidden = false;
+      requestStatus.textContent = message;
+      requestStatus.classList.remove("is-error", "is-success");
+      if (className) requestStatus.classList.add(className);
+    };
     const validators = {
       name: (value) => {
         if (value.length < 2) return "Enter a real name.";
@@ -161,8 +182,8 @@
     ["name", "school", "contact"].forEach((fieldName) => {
       requestForm.elements[fieldName].addEventListener("input", () => {
         requestForm.elements[fieldName].setCustomValidity("");
-        requestStatus.classList.remove("is-error", "is-success");
-        requestStatus.textContent = "No data is sent yet. This local demo shows the planned intake behavior.";
+        hideRequestStatus();
+        if (submitResult) submitResult.hidden = true;
       });
     });
 
@@ -170,9 +191,7 @@
       event.preventDefault();
       const error = validateRequest();
       if (error) {
-        requestStatus.classList.remove("is-success");
-        requestStatus.classList.add("is-error");
-        requestStatus.textContent = error;
+        showRequestStatus(error, "is-error");
         requestForm.reportValidity();
         return;
       }
@@ -183,8 +202,8 @@
       const need = String(data.get("need") || "lead qualification").trim();
       const contact = String(data.get("contact") || "").trim();
 
-      requestStatus.classList.remove("is-error", "is-success");
-      requestStatus.textContent = "Saving request and preparing bot qualification...";
+      showRequestStatus("Saving request...");
+      if (submitButton) submitButton.disabled = true;
 
       try {
         const response = await fetch("/api/lead", {
@@ -198,11 +217,32 @@
           throw new Error(result.errors?.join(" ") || result.error || "Request was not accepted.");
         }
 
-        requestStatus.classList.add("is-success");
-        requestStatus.textContent = `${name} from ${school}: request saved. Score: ${result.scoring.score}. Next step: Telegram bot qualification for ${need}.`;
+        const intakeScore = scoreMap.intake;
+        hideRequestStatus();
+        setText("submit-contact", contact);
+        setText("submit-route", need === "Manager alerts" ? "Manager alert setup" : "Telegram qualification");
+        setText("submit-status", result.scoring?.status === "intake" ? "Waiting for bot answers" : "Saved");
+        if (submitResult) submitResult.hidden = false;
+
+        setText("profile-title", intakeScore.title);
+        setText("profile-action", intakeScore.action);
+        setScore("profile-score", intakeScore);
+        setText("telegram-title", intakeScore.telegramTitle);
+        setText(
+          "telegram-body",
+          `${name}: ${need.toLowerCase()} request from ${school}. Contact path is open; qualification answers are still missing.`,
+        );
+        setText("telegram-action", intakeScore.telegramAction);
+        setText("crm-name", name);
+        setScore("crm-score", intakeScore);
+
+        window.setTimeout(() => {
+          document.getElementById("qualification")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+        }, 700);
       } catch (submitError) {
-        requestStatus.classList.add("is-error");
-        requestStatus.textContent = `${submitError.message} If the API is not running, start it with node scripts/dev-server.mjs.`;
+        showRequestStatus(`${submitError.message} If the API is not running, start it with node scripts/dev-server.mjs.`, "is-error");
+      } finally {
+        if (submitButton) submitButton.disabled = false;
       }
     });
   }

@@ -24,12 +24,16 @@ Accepts landing form submissions.
 
 Creates a lead, validates fields, writes local CRM fallback, prepares scoring,
 and attempts n8n webhook delivery if `N8N_LEAD_WEBHOOK_URL` is configured.
+The form submission is an intake event, so its event name is `lead.created`
+and its score is `pending` until the bot collects qualification answers.
 
 ### `POST /api/telegram`
 
 Receives Telegram webhook updates and runs the 6-question qualification flow.
 If `TELEGRAM_WEBHOOK_SECRET` is configured, the request must include
 `X-Telegram-Bot-Api-Secret-Token`.
+When the flow completes, the bot emits `lead.qualified` with a `hot`, `warm`,
+or `cold` score.
 
 ### `POST /api/rag`
 

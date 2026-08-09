@@ -1,4 +1,4 @@
-import { formatClientReply, formatManagerAlert, makeReplyMarkup } from "./formatters.mjs";
+import { formatClientReply, formatIntakeAlert, formatManagerAlert, makeReplyMarkup } from "./formatters.mjs";
 import { buildN8nPayload, sendToN8n } from "./n8n.mjs";
 import { nextQuestion } from "./questions.mjs";
 import { answerWithRag } from "./rag.mjs";
@@ -70,11 +70,28 @@ export async function createLeadFromLanding(config, input) {
   }
 
   const lead = normalizeLeadFromLanding(input);
-  const scoring = scoreLead(lead);
+  const scoring = {
+    score: "pending",
+    points: 0,
+    reasons: ["waiting for qualification answers"],
+    nextAction: "Continue qualification in Telegram.",
+    status: "intake",
+  };
   const rag = await answerWithRag(`${lead.need} ${input.school || ""}`);
-  const payload = buildN8nPayload(lead, scoring, rag.sources);
+  const payload = buildN8nPayload(lead, scoring, rag.sources, "lead.created");
 
   await appendLead(lead, scoring);
+
+  const deliveries = {
+    manager: null,
+    n8n: null,
+  };
+
+  try {
+    deliveries.manager = await notifyManager(config, formatIntakeAlert(lead));
+  } catch (error) {
+    deliveries.manager = { ok: false, error: error.message };
+  }
 
   let n8nDelivery = null;
   try {
@@ -82,6 +99,7 @@ export async function createLeadFromLanding(config, input) {
   } catch (error) {
     n8nDelivery = { ok: false, error: error.message };
   }
+  deliveries.n8n = n8nDelivery;
 
   return {
     ok: true,
@@ -89,6 +107,8 @@ export async function createLeadFromLanding(config, input) {
     lead,
     scoring,
     rag,
+    payload,
+    deliveries,
     n8n: n8nDelivery,
     nextBotQuestion: "Telegram bot should continue with goal, level, start, format, budget, and contact time.",
   };

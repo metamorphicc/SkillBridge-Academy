@@ -137,9 +137,19 @@
               </span>
             </label>
             <button class="btn btn--large" type="submit">Send request</button>
-            <p class="form-status" id="request-status" role="status">
-              No data is sent yet. This local demo shows the planned intake behavior.
-            </p>
+            <p class="form-status" id="request-status" role="status" hidden></p>
+            <div class="submit-result" id="submit-result" hidden>
+              <p class="label">Captured intake</p>
+              <dl>
+                <div><dt>Contact</dt><dd id="submit-contact">Not sent</dd></div>
+                <div><dt>Route</dt><dd id="submit-route">Telegram qualification</dd></div>
+                <div><dt>Status</dt><dd id="submit-status">Waiting for answers</dd></div>
+              </dl>
+              <div class="submit-result__actions">
+                <a class="btn btn--small" href="#qualification">Try qualification</a>
+                <a class="btn btn--outline btn--small" href="#manager">See manager view</a>
+              </div>
+            </div>
           </form>
 
           <article class="handoff-card" aria-label="What happens after request">
@@ -350,7 +360,7 @@
               <span role="columnheader">Goal</span>
               <span role="columnheader">Start</span>
               <span role="columnheader">Score</span>
-              <b role="cell">Anna</b>
+              <b role="cell" id="crm-name">Anna</b>
               <b role="cell" id="crm-goal">Career change</b>
               <b role="cell" id="crm-start">This month</b>
               <b role="cell"><span class="score score--hot" id="crm-score">Hot</span></b>

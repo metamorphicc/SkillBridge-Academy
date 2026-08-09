@@ -1,0 +1,37 @@
+{
+  "event": "lead.created",
+  "version": "1.0",
+  "lead": {
+    "id": "uuid",
+    "createdAt": "2026-08-10T00:00:00.000Z",
+    "name": "Anna Petrova",
+    "school": "Online design academy",
+    "contact": "@anna",
+    "need": "Manager alerts",
+    "source": "landing_form",
+    "telegramChatId": null,
+    "answers": {
+      "goal": "",
+      "level": "",
+      "start": "",
+      "format": "",
+      "budget": "",
+      "contactTime": ""
+    }
+  },
+  "scoring": {
+    "score": "pending",
+    "points": 0,
+    "reasons": ["waiting for qualification answers"],
+    "nextAction": "Continue qualification in Telegram.",
+    "status": "intake"
+  },
+  "rag": {
+    "sources": ["pricing-readiness", "follow-up-policy"]
+  },
+  "routing": {
+    "crm": "google_sheets_or_local_csv",
+    "managerAlert": "after_qualification",
+    "followUp": "qualification"
+  }
+}

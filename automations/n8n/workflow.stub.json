@@ -1,11 +1,13 @@
 {
-  "name": "SkillBridge Lead Qualification Pipeline",
+  "name": "SkillBridge Lead Events Pipeline",
   "nodes": [
     {
-      "name": "Qualified Lead Webhook",
+      "name": "Lead Event Webhook",
       "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [120, 240],
       "parameters": {
-        "path": "skillbridge/lead-qualified",
+        "path": "skillbridge/lead-events",
         "httpMethod": "POST",
         "responseMode": "responseNode"
       }
@@ -13,6 +15,8 @@
     {
       "name": "Validate Secret",
       "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [380, 240],
       "parameters": {
         "conditions": {
           "string": [
@@ -28,14 +32,35 @@
     {
       "name": "Append Google Sheets Row",
       "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [660, 160],
       "parameters": {
         "operation": "append",
         "sheetName": "Leads"
       }
     },
     {
+      "name": "Is Qualified",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [920, 160],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event}}",
+              "operation": "equals",
+              "value2": "lead.qualified"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "Notify Manager",
       "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1180, 60],
       "parameters": {
         "operation": "sendMessage",
         "text": "={{'New ' + $json.scoring.score.toUpperCase() + ' lead: ' + $json.lead.name + '\\nContact: ' + $json.lead.contact + '\\nNext: ' + $json.scoring.nextAction}}"
@@ -44,26 +69,50 @@
     {
       "name": "Create Follow-up",
       "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1420, 60],
       "parameters": {}
     },
     {
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1660, 220],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={\"ok\":true}"
       }
+    },
+    {
+      "name": "Respond Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [660, 360],
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 401,
+        "responseBody": "={\"ok\":false,\"error\":\"invalid secret\"}"
+      }
     }
   ],
   "connections": {
-    "Qualified Lead Webhook": {
+    "Lead Event Webhook": {
       "main": [[{ "node": "Validate Secret", "type": "main", "index": 0 }]]
     },
     "Validate Secret": {
-      "main": [[{ "node": "Append Google Sheets Row", "type": "main", "index": 0 }]]
+      "main": [
+        [{ "node": "Append Google Sheets Row", "type": "main", "index": 0 }],
+        [{ "node": "Respond Unauthorized", "type": "main", "index": 0 }]
+      ]
     },
     "Append Google Sheets Row": {
-      "main": [[{ "node": "Notify Manager", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Is Qualified", "type": "main", "index": 0 }]]
+    },
+    "Is Qualified": {
+      "main": [
+        [{ "node": "Notify Manager", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
     },
     "Notify Manager": {
       "main": [[{ "node": "Create Follow-up", "type": "main", "index": 0 }]]

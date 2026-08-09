@@ -745,6 +745,11 @@ dd {
   color: var(--color-next-deep);
 }
 
+.score--intake {
+  background: var(--tint-accent);
+  color: var(--color-accent-deep);
+}
+
 .score--cold {
   background: var(--tint-cold);
   color: var(--color-cold-deep);
@@ -881,6 +886,51 @@ dd {
 .form-status.is-error {
   color: var(--color-hot-deep);
   font-weight: 750;
+}
+
+.submit-result {
+  display: grid;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hairline) solid var(--color-rule);
+}
+
+.submit-result[hidden] {
+  display: none;
+}
+
+.submit-result dl {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+}
+
+.submit-result dl div {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 0.42fr) minmax(0, 1fr);
+  gap: var(--space-sm);
+}
+
+.submit-result dt {
+  color: var(--color-muted);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.submit-result dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.submit-result__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
 }
 
 .handoff-card {

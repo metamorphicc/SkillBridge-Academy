@@ -1,6 +1,6 @@
-export function buildN8nPayload(lead, scoring, ragSources = []) {
+export function buildN8nPayload(lead, scoring, ragSources = [], event = "lead.qualified") {
   return {
-    event: "lead.qualified",
+    event,
     version: "1.0",
     lead: {
       id: lead.id,
@@ -19,9 +19,18 @@ export function buildN8nPayload(lead, scoring, ragSources = []) {
     },
     routing: {
       crm: "google_sheets_or_local_csv",
-      managerAlert: scoring.score === "hot" ? "urgent" : scoring.score === "warm" ? "today" : "nurture",
+      managerAlert:
+        scoring.score === "pending"
+          ? "after_qualification"
+          : scoring.score === "hot"
+            ? "urgent"
+            : scoring.score === "warm"
+              ? "today"
+              : "nurture",
       followUp:
-        scoring.score === "hot"
+        scoring.score === "pending"
+          ? "qualification"
+          : scoring.score === "hot"
           ? "call_window"
           : scoring.score === "warm"
             ? "fit_questions"
