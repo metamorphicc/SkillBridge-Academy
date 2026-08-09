@@ -41,10 +41,14 @@ async function finalizeLead(config, lead) {
     n8n: null,
   };
 
-  try {
-    deliveries.manager = await notifyManager(config, formatManagerAlert(lead, scoring, rag.sources));
-  } catch (error) {
-    deliveries.manager = { ok: false, error: error.message };
+  if (config.n8nLeadWebhookUrl) {
+    deliveries.manager = { ok: false, skipped: true, reason: "manager alert is routed through n8n" };
+  } else {
+    try {
+      deliveries.manager = await notifyManager(config, formatManagerAlert(lead, scoring, rag.sources));
+    } catch (error) {
+      deliveries.manager = { ok: false, error: error.message };
+    }
   }
 
   try {
@@ -87,10 +91,14 @@ export async function createLeadFromLanding(config, input) {
     n8n: null,
   };
 
-  try {
-    deliveries.manager = await notifyManager(config, formatIntakeAlert(lead));
-  } catch (error) {
-    deliveries.manager = { ok: false, error: error.message };
+  if (config.n8nLeadWebhookUrl) {
+    deliveries.manager = { ok: false, skipped: true, reason: "manager alert is routed through n8n" };
+  } else {
+    try {
+      deliveries.manager = await notifyManager(config, formatIntakeAlert(lead));
+    } catch (error) {
+      deliveries.manager = { ok: false, error: error.message };
+    }
   }
 
   let n8nDelivery = null;
