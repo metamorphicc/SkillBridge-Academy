@@ -1,0 +1,9 @@
+{
+  "date": "2026-08-10",
+  "design_md": "design.md locked to studied-DNA from https://www.usehallmark.com/examples/hum-07/",
+  "font_stack": "Plus Jakarta Sans for display/body; JetBrains Mono for labels",
+  "palette": "pale institutional paper, ink text, admissions-blue primary, functional chat/next/hot/cold accents",
+  "motion": "CSS and vanilla JS only: nav float, stage reveal, qualification update",
+  "spacing": "4pt token scale in tokens.css",
+  "framework": "static HTML landing page"
+}

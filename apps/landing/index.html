@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en" data-theme="skillbridge">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="SkillBridge Academy qualifies online-school leads through chat, scoring, manager alerts, and follow-up."
+    />
+    <title>SkillBridge Academy - Lead qualification for online schools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="sr-only" href="#main">Skip to content</a>
+
+    <header class="nav" id="nav">
+      <div class="nav__inner">
+        <a class="brand" href="#top" aria-label="SkillBridge Academy home">
+          <span class="brand__mark" aria-hidden="true">SB</span>
+          <span>SkillBridge</span>
+        </a>
+        <nav class="nav__links" aria-label="Primary">
+          <a href="#request">Request</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#qualification">Qualification</a>
+          <a href="#manager">Manager view</a>
+        </nav>
+        <a class="btn btn--small" href="#request">Leave request</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero__grid">
+          <div class="hero__lead">
+            <div class="process" aria-label="SkillBridge core flow">
+              <span class="process__step process__step--lead"><span></span>Lead</span>
+              <span class="process__line"></span>
+              <span class="process__step process__step--chat"><span></span>Chat</span>
+              <span class="process__line"></span>
+              <span class="process__step process__step--score"><span></span>Score</span>
+              <span class="process__line"></span>
+              <span class="process__step process__step--alert"><span></span>Alert</span>
+            </div>
+            <h1 id="hero-title">Know who to call first.</h1>
+            <p class="hero__lede">
+              SkillBridge qualifies incoming applicants for online schools, turns answers into a lead
+              profile, and routes the next action to the admissions manager.
+            </p>
+            <div class="hero__cta" aria-label="Primary actions">
+              <a class="btn btn--large" href="#request">Leave a demo request</a>
+              <a class="btn btn--outline btn--large" href="#manager">See manager view</a>
+            </div>
+            <p class="hero__note">Landing form -> Telegram bot -> CRM -> manager alert</p>
+          </div>
+
+          <div class="hero__product" aria-label="Live product preview">
+            <article class="route-board" aria-label="Admissions routing board">
+              <div class="route-board__head">
+                <p class="label">Live routing</p>
+                <span>3 leads sorted</span>
+              </div>
+              <div class="route-board__lanes">
+                <section class="route-lane route-lane--hot" aria-label="Hot lead lane">
+                  <span>Hot</span>
+                  <article class="route-ticket">
+                    <b>Anna</b>
+                    <p>Product analytics · this month</p>
+                  </article>
+                </section>
+                <section class="route-lane route-lane--warm" aria-label="Warm lead lane">
+                  <span>Warm</span>
+                  <article class="route-ticket">
+                    <b>Denis</b>
+                    <p>Needs format details</p>
+                  </article>
+                </section>
+                <section class="route-lane route-lane--cold" aria-label="Cold lead lane">
+                  <span>Follow</span>
+                  <article class="route-ticket">
+                    <b>Mira</b>
+                    <p>Browsing programs</p>
+                  </article>
+                </section>
+              </div>
+            </article>
+            <article class="message-card" role="status">
+              <span class="message-card__dot" aria-hidden="true"></span>
+              <div>
+                <p class="message-card__head">Manager alert</p>
+                <p class="message-card__body">Hot lead. Send available call slots.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--band" id="request" aria-labelledby="request-title">
+        <header class="section__head">
+          <p class="eyebrow"><span class="dot dot--accent"></span>Landing form</p>
+          <h2 class="section__title" id="request-title">Start with one real request.</h2>
+          <p class="section__lede">
+            This is the first step of the case: a school owner or admissions manager leaves contact
+            details, then the qualification flow can continue in Telegram.
+          </p>
+        </header>
+
+        <div class="request-grid">
+          <form class="request-form" id="request-form" aria-describedby="request-status">
+            <label>
+              <span>Name</span>
+              <input name="name" autocomplete="name" placeholder="Anna Petrova" required />
+            </label>
+            <label>
+              <span>School or project</span>
+              <input name="school" autocomplete="organization" placeholder="Online design academy" required />
+            </label>
+            <label>
+              <span>Telegram or phone</span>
+              <input name="contact" autocomplete="tel" placeholder="@anna or +7..." required />
+            </label>
+            <label class="field field--select">
+              <span>What should be automated?</span>
+              <span class="select-wrap">
+                <select name="need" required>
+                  <option value="Lead qualification">Lead qualification</option>
+                  <option value="Manager alerts">Manager alerts</option>
+                  <option value="CRM and follow-up">CRM and follow-up</option>
+                </select>
+                <span class="select-cue" aria-hidden="true"></span>
+              </span>
+            </label>
+            <button class="btn btn--large" type="submit">Send request</button>
+            <p class="form-status" id="request-status" role="status">
+              No data is sent yet. This local demo shows the planned intake behavior.
+            </p>
+          </form>
+
+          <article class="handoff-card" aria-label="What happens after request">
+            <p class="label">After submit</p>
+            <ol>
+              <li>
+                <span>1</span>
+                <div><b>Request captured</b><small>Name, school, contact, automation need.</small></div>
+              </li>
+              <li>
+                <span>2</span>
+                <div><b>Bot continues</b><small>Goal, level, start date, format, budget.</small></div>
+              </li>
+              <li>
+                <span>3</span>
+                <div><b>Manager brief</b><small>Score, CRM row, Telegram alert, next action.</small></div>
+              </li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section--workflow" id="workflow" aria-labelledby="workflow-title">
+        <header class="section__head">
+          <p class="eyebrow"><span class="dot dot--accent"></span>The operating loop</p>
+          <h2 class="section__title" id="workflow-title">One admissions flow, kept in order.</h2>
+          <p class="section__lede">
+            The page follows the product itself. Every step either collects missing context or gives the
+            manager a clearer next move.
+          </p>
+        </header>
+
+        <div class="stages" aria-label="Lead qualification workflow">
+          <article class="stage stage--lead is-in">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">1</span>
+              <span class="stage__line"></span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Lead · request received</p>
+              <h3>New applicant arrives</h3>
+              <p>
+                The first screen is not a long form. It asks only enough to move the applicant into a
+                short qualification chat.
+              </p>
+              <div class="chips">
+                <span>Source saved</span>
+                <span>Contact path open</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage stage--chat">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">2</span>
+              <span class="stage__line"></span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Chat · three useful questions</p>
+              <h3>Goal, level, start date</h3>
+              <p>
+                SkillBridge asks for the signals admissions teams actually use before a call, then
+                keeps the answer short and structured.
+              </p>
+              <div class="mini-chat" aria-label="Qualification chat example">
+                <span>What goal brings you here?</span>
+                <b>I want to switch into analytics.</b>
+                <span>When would you like to start?</span>
+                <b>This month, if the format fits.</b>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage stage--score">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">3</span>
+              <span class="stage__line"></span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Score · priority attached</p>
+              <h3>Hot, warm, or cold</h3>
+              <p>
+                Priority is not cosmetic. Each score carries the action the team should take next.
+              </p>
+              <div class="score-row">
+                <span class="score score--hot">Hot</span>
+                <span class="score score--warm">Warm</span>
+                <span class="score score--cold">Cold</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage stage--alert">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">4</span>
+              <span class="stage__line"></span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Alert · manager sees context</p>
+              <h3>Important leads surface fast</h3>
+              <p>
+                A manager gets the applicant summary, start window, readiness signal, and next action in
+                Telegram.
+              </p>
+              <div class="alert-preview">
+                <b>New hot lead</b>
+                <span>Anna · product analytics · this month</span>
+                <strong>Next: send schedule options</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage stage--next">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">5</span>
+              <span class="stage__line"></span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Next action · queue stays clean</p>
+              <h3>Every lead leaves with a task</h3>
+              <p>
+                Hot leads go to a call, warm leads get fit questions, and cold leads move into nurture
+                without blocking the admissions queue.
+              </p>
+            </div>
+          </article>
+
+          <article class="stage stage--follow">
+            <div class="stage__rail" aria-hidden="true">
+              <span class="stage__node">6</span>
+            </div>
+            <div class="stage__panel">
+              <p class="stage__label">Follow-up · reason remembered</p>
+              <h3>No application disappears</h3>
+              <p>
+                Reminders keep the original context attached, so the follow-up sounds specific instead
+                of automated.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section--band" id="qualification" aria-labelledby="qualification-title">
+        <header class="section__head section__head--center">
+          <p class="eyebrow"><span class="dot dot--chat"></span>Qualification demo</p>
+          <h2 class="section__title" id="qualification-title">Change the answers. Watch the lead move.</h2>
+        </header>
+
+        <div class="qualification">
+          <form class="qualifier" aria-label="Try the qualification">
+            <fieldset>
+              <legend>Goal</legend>
+              <label><input type="radio" name="goal" value="career" checked /> Career change</label>
+              <label><input type="radio" name="goal" value="upgrade" /> Improve current role</label>
+              <label><input type="radio" name="goal" value="browse" /> Explore programs</label>
+            </fieldset>
+            <fieldset>
+              <legend>Level</legend>
+              <label><input type="radio" name="level" value="beginner" checked /> Beginner</label>
+              <label><input type="radio" name="level" value="working" /> Already practicing</label>
+              <label><input type="radio" name="level" value="advanced" /> Experienced</label>
+            </fieldset>
+            <fieldset>
+              <legend>Start</legend>
+              <label><input type="radio" name="start" value="soon" checked /> This month</label>
+              <label><input type="radio" name="start" value="later" /> In 1-2 months</label>
+              <label><input type="radio" name="start" value="unknown" /> Not sure yet</label>
+            </fieldset>
+          </form>
+
+          <article class="profile" aria-live="polite">
+            <div class="profile__top">
+              <div>
+                <p class="label">Structured lead profile</p>
+                <h3 id="profile-title">Hot lead</h3>
+              </div>
+              <span class="score score--hot" id="profile-score">Hot</span>
+            </div>
+            <dl class="profile__list">
+              <div><dt>Goal</dt><dd id="profile-goal">Career change</dd></div>
+              <div><dt>Level</dt><dd id="profile-level">Beginner</dd></div>
+              <div><dt>Start</dt><dd id="profile-start">This month</dd></div>
+              <div><dt>Next action</dt><dd id="profile-action">Send schedule options</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="manager" aria-labelledby="manager-title">
+        <header class="section__head">
+          <p class="eyebrow"><span class="dot dot--hot"></span>Manager view</p>
+          <h2 class="section__title" id="manager-title">The alert reads like a brief, not a dump.</h2>
+        </header>
+
+        <div class="manager">
+          <article class="telegram">
+            <p class="label">Telegram</p>
+            <h3 id="telegram-title">New hot lead</h3>
+            <p id="telegram-body">Anna is changing career, beginner level, ready to start this month.</p>
+            <strong id="telegram-action">Next: send schedule options</strong>
+          </article>
+
+          <article class="crm">
+            <p class="label">CRM row</p>
+            <div class="crm__grid" role="table" aria-label="CRM preview">
+              <span role="columnheader">Name</span>
+              <span role="columnheader">Goal</span>
+              <span role="columnheader">Start</span>
+              <span role="columnheader">Score</span>
+              <b role="cell">Anna</b>
+              <b role="cell" id="crm-goal">Career change</b>
+              <b role="cell" id="crm-start">This month</b>
+              <b role="cell"><span class="score score--hot" id="crm-score">Hot</span></b>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section--band" id="follow-up" aria-labelledby="follow-title">
+        <header class="section__head section__head--center">
+          <p class="eyebrow"><span class="dot dot--next"></span>Follow-up</p>
+          <h2 class="section__title" id="follow-title">The next message keeps the reason.</h2>
+          <p class="section__lede">
+            SkillBridge keeps the qualification context attached to the reminder, so admissions work
+            does not turn into generic chasing.
+          </p>
+        </header>
+
+        <div class="follow-cards">
+          <article>
+            <span class="follow-cards__mark">Hot</span>
+            <h3>Call window</h3>
+            <p>Offer times while intent is fresh.</p>
+          </article>
+          <article>
+            <span class="follow-cards__mark">Warm</span>
+            <h3>Fit check</h3>
+            <p>Clarify timing, format, and readiness.</p>
+          </article>
+          <article>
+            <span class="follow-cards__mark">Cold</span>
+            <h3>Nurture</h3>
+            <p>Send useful material and check back later.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section closer" aria-labelledby="closer-title">
+        <h2 class="closer__title" id="closer-title">Build the intake loop.</h2>
+        <p class="closer__lede">
+          Leave a demo request first, then test how qualification changes the manager summary.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--large" href="#request">Leave a demo request</a>
+          <a class="btn btn--outline btn--large" href="#manager">See manager view</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <p class="footer__statement">Admissions should know what happened.</p>
+        <div class="footer__meta">
+          <a class="brand" href="#top"><span class="brand__mark" aria-hidden="true">SB</span><span>SkillBridge</span></a>
+          <p>AI admissions assistant for online schools</p>
+          <p><a href="#request">Request demo</a><br />Lead · chat · score · alert · follow-up</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
