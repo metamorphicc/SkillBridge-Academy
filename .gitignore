@@ -1,0 +1,13 @@
+.env
+.env.local
+node_modules/
+npm-debug.log*
+
+# Local CRM fallback data
+crm/leads.local.csv
+crm/leads.local.json
+apps/bot/storage/*.json
+
+# Runtime artifacts
+.DS_Store
+Thumbs.db

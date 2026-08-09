@@ -1,0 +1,38 @@
+[
+  {
+    "id": "program-product-analytics",
+    "title": "Product analytics track",
+    "tags": ["analytics", "career", "data", "product"],
+    "content": "The product analytics track is for beginners and junior specialists who want to move into analytics roles. It focuses on metrics, SQL basics, dashboards, interviews, and a portfolio project. Recommended start: this month or within 1-2 months."
+  },
+  {
+    "id": "program-design",
+    "title": "Digital design track",
+    "tags": ["design", "ux", "ui", "portfolio"],
+    "content": "The digital design track helps students build a portfolio for UX/UI or product design roles. It fits career changers, freelancers, and marketing specialists who need a structured path and mentor feedback."
+  },
+  {
+    "id": "format-group",
+    "title": "Group format",
+    "tags": ["group", "format", "schedule"],
+    "content": "Group format is best for students who want a fixed schedule, peer accountability, and regular mentor sessions. Admissions managers should clarify start date and weekly availability."
+  },
+  {
+    "id": "format-consultation",
+    "title": "Consultation format",
+    "tags": ["consultation", "mentor", "individual"],
+    "content": "Consultation format is best when the student already knows the direction and needs a quick fit check, portfolio review, or career plan. It is often a warm lead unless the student wants to start within 7 days."
+  },
+  {
+    "id": "pricing-readiness",
+    "title": "Budget readiness",
+    "tags": ["budget", "payment", "price", "ready"],
+    "content": "Budget readiness is a strong lead signal. If the student says they are ready to discuss payment or choose a format this week, route to manager quickly. If they only ask for prices and are unsure about timing, nurture first."
+  },
+  {
+    "id": "follow-up-policy",
+    "title": "Follow-up policy",
+    "tags": ["follow-up", "nurture", "reminder"],
+    "content": "Hot leads should be contacted as soon as possible. Warm leads should receive fit questions the same day. Cold leads should receive useful intro material and a reminder later, without blocking the manager queue."
+  }
+]

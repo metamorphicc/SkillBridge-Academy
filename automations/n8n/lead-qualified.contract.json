@@ -1,0 +1,37 @@
+{
+  "event": "lead.qualified",
+  "version": "1.0",
+  "lead": {
+    "id": "uuid",
+    "createdAt": "2026-08-10T00:00:00.000Z",
+    "name": "Anna Petrova",
+    "school": "Online design academy",
+    "contact": "@anna",
+    "need": "Lead qualification",
+    "source": "landing_form",
+    "telegramChatId": null,
+    "answers": {
+      "goal": "Change career",
+      "level": "Beginner",
+      "start": "Within 7 days",
+      "format": "Group",
+      "budget": "Ready to discuss",
+      "contactTime": "Today"
+    }
+  },
+  "scoring": {
+    "score": "hot",
+    "points": 100,
+    "reasons": ["near start date", "budget readiness", "clear learning goal", "format preference", "usable contact"],
+    "nextAction": "Contact urgently and offer available call slots.",
+    "status": "new"
+  },
+  "rag": {
+    "sources": ["program-product-analytics", "pricing-readiness", "follow-up-policy"]
+  },
+  "routing": {
+    "crm": "google_sheets_or_local_csv",
+    "managerAlert": "urgent",
+    "followUp": "call_window"
+  }
+}

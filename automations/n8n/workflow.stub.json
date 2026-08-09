@@ -1,0 +1,75 @@
+{
+  "name": "SkillBridge Lead Qualification Pipeline",
+  "nodes": [
+    {
+      "name": "Qualified Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": {
+        "path": "skillbridge/lead-qualified",
+        "httpMethod": "POST",
+        "responseMode": "responseNode"
+      }
+    },
+    {
+      "name": "Validate Secret",
+      "type": "n8n-nodes-base.if",
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$headers['x-skillbridge-secret']}}",
+              "operation": "equals",
+              "value2": "skillbridge-local-secret"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Append Google Sheets Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "parameters": {
+        "operation": "append",
+        "sheetName": "Leads"
+      }
+    },
+    {
+      "name": "Notify Manager",
+      "type": "n8n-nodes-base.telegram",
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "={{'New ' + $json.scoring.score.toUpperCase() + ' lead: ' + $json.lead.name + '\\nContact: ' + $json.lead.contact + '\\nNext: ' + $json.scoring.nextAction}}"
+      }
+    },
+    {
+      "name": "Create Follow-up",
+      "type": "n8n-nodes-base.noOp",
+      "parameters": {}
+    },
+    {
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":true}"
+      }
+    }
+  ],
+  "connections": {
+    "Qualified Lead Webhook": {
+      "main": [[{ "node": "Validate Secret", "type": "main", "index": 0 }]]
+    },
+    "Validate Secret": {
+      "main": [[{ "node": "Append Google Sheets Row", "type": "main", "index": 0 }]]
+    },
+    "Append Google Sheets Row": {
+      "main": [[{ "node": "Notify Manager", "type": "main", "index": 0 }]]
+    },
+    "Notify Manager": {
+      "main": [[{ "node": "Create Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Create Follow-up": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  }
+}
