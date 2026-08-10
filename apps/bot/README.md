@@ -16,6 +16,9 @@ Lead qualification bot for the SkillBridge Academy automation case.
   6. convenient contact time
 - Landing intake status: `pending`
 - Qualified lead score after bot answers: `hot`, `warm`, or `cold`
+- Chat cleanup: active prompts and recent user answers are deleted best-effort
+- `Back` keyboard control lets the lead revise the previous answer
+- Final user message shows the selected answers, priority score, and next action
 - Local CRM fallback: `crm/leads.local.csv` and `crm/leads.local.json`
 - Manager Telegram alert fallback when `ADMIN_CHAT_ID` is configured and n8n is not
 - n8n webhook delivery when `N8N_LEAD_WEBHOOK_URL` is configured
@@ -59,4 +62,6 @@ node apps/bot/src/simulate.mjs
 
 - `/start` starts qualification
 - `/reset` clears the current session
+- `Back` returns to the previous qualification answer
+- `Reset` clears the current session from the reply keyboard
 - `/ask <question>` searches the local school knowledge base

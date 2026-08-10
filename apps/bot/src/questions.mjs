@@ -34,3 +34,12 @@ export const QUALIFICATION_STEPS = [
 export function nextQuestion(answers) {
   return QUALIFICATION_STEPS.find((step) => !answers[step.key]) || null;
 }
+
+export function previousAnsweredQuestion(answers) {
+  return [...QUALIFICATION_STEPS].reverse().find((step) => answers[step.key]) || null;
+}
+
+export function questionIndex(question) {
+  const index = QUALIFICATION_STEPS.findIndex((step) => step.key === question?.key);
+  return index < 0 ? 0 : index + 1;
+}

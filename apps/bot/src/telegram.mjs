@@ -27,6 +27,18 @@ export async function sendMessage(config, chatId, text, replyMarkup) {
   });
 }
 
+export async function deleteMessage(config, chatId, messageId) {
+  if (!messageId) return { ok: false, skipped: true, reason: "message id is missing" };
+  try {
+    return await telegramRequest(config, "deleteMessage", {
+      chat_id: chatId,
+      message_id: messageId,
+    });
+  } catch (error) {
+    return { ok: false, skipped: true, reason: error.message };
+  }
+}
+
 export async function notifyManager(config, text) {
   if (!hasManager(config)) {
     return { ok: false, skipped: true, reason: "ADMIN_CHAT_ID is not configured" };

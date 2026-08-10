@@ -1,3 +1,10 @@
+export function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 export function formatManagerAlert(lead, scoring, ragSources = []) {
   const answers = lead.answers || {};
   return [
@@ -43,11 +50,35 @@ export function formatClientReply(scoring) {
   return "Thanks. I saved the request. I will send helpful intro material first, then the team can follow up when the timing is clearer.";
 }
 
-export function makeReplyMarkup(question) {
+export function formatLeadSummary(lead, scoring) {
+  const answers = lead.answers || {};
+  return [
+    "Qualification complete.",
+    "",
+    `<b>Lead profile</b>`,
+    `Goal: ${escapeHtml(answers.goal || "Not answered")}`,
+    `Level: ${escapeHtml(answers.level || "Not answered")}`,
+    `Start: ${escapeHtml(answers.start || "Not answered")}`,
+    `Format: ${escapeHtml(answers.format || "Not answered")}`,
+    `Budget: ${escapeHtml(answers.budget || "Not answered")}`,
+    `Contact time: ${escapeHtml(answers.contactTime || "Not answered")}`,
+    "",
+    `<b>Priority</b>: ${escapeHtml(scoring.score.toUpperCase())} (${scoring.points}/100)`,
+    `Next action: ${escapeHtml(scoring.nextAction)}`,
+  ].join("\n");
+}
+
+export function makeReplyMarkup(question, options = {}) {
   if (!question?.quickReplies?.length) return undefined;
+  const rows = question.quickReplies.map((reply) => [{ text: reply }]);
+  const controls = [];
+  if (options.canGoBack) controls.push({ text: "Back" });
+  controls.push({ text: "Reset" });
+  rows.push(controls);
+
   return {
-    keyboard: question.quickReplies.map((reply) => [{ text: reply }]),
+    keyboard: rows,
     resize_keyboard: true,
-    one_time_keyboard: true,
+    one_time_keyboard: false,
   };
 }

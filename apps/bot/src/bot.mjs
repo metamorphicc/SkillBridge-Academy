@@ -1,13 +1,20 @@
-import { formatClientReply, formatIntakeAlert, formatManagerAlert, makeReplyMarkup } from "./formatters.mjs";
+import {
+  formatClientReply,
+  formatIntakeAlert,
+  formatLeadSummary,
+  formatManagerAlert,
+  makeReplyMarkup,
+} from "./formatters.mjs";
 import { buildN8nPayload, sendToN8n } from "./n8n.mjs";
-import { nextQuestion } from "./questions.mjs";
+import { QUALIFICATION_STEPS, nextQuestion, previousAnsweredQuestion, questionIndex } from "./questions.mjs";
 import { answerWithRag } from "./rag.mjs";
 import { normalizeLeadFromLanding, scoreLead, validateLandingLead } from "./scoring.mjs";
 import { appendLead, clearSession, getSession, saveSession } from "./storage.mjs";
-import { notifyManager, sendMessage } from "./telegram.mjs";
+import { deleteMessage, notifyManager, sendMessage } from "./telegram.mjs";
 
 const textOf = (update) => update?.message?.text?.trim() || "";
 const chatIdOf = (update) => update?.message?.chat?.id;
+const messageIdOf = (update) => update?.message?.message_id;
 const nameOf = (update) => {
   const from = update?.message?.from || {};
   return [from.first_name, from.last_name].filter(Boolean).join(" ") || from.username || "Telegram lead";
@@ -18,7 +25,7 @@ const usernameOf = (update) => {
 };
 
 function buildSessionFromTelegram(update) {
-  return normalizeLeadFromLanding({
+  const lead = normalizeLeadFromLanding({
     name: nameOf(update),
     contact: usernameOf(update),
     school: "SkillBridge Academy lead",
@@ -26,6 +33,38 @@ function buildSessionFromTelegram(update) {
     source: "telegram_bot",
     telegramChatId: chatIdOf(update),
   });
+  lead.ui = { promptMessageId: null };
+  return lead;
+}
+
+function canGoBack(lead) {
+  return QUALIFICATION_STEPS.some((step) => lead.answers?.[step.key]);
+}
+
+async function cleanupActivePrompt(config, chatId, lead, userMessageId) {
+  await deleteMessage(config, chatId, lead?.ui?.promptMessageId);
+  await deleteMessage(config, chatId, userMessageId);
+  if (lead?.ui) lead.ui.promptMessageId = null;
+}
+
+async function askQuestion(config, chatId, lead, question, intro = "") {
+  const prefix = intro ? `${intro}\n\n` : "";
+  const message = await sendMessage(
+    config,
+    chatId,
+    `${prefix}<b>Question ${questionIndex(question)}/${QUALIFICATION_STEPS.length}</b>\n${question.prompt}`,
+    makeReplyMarkup(question, { canGoBack: canGoBack(lead) }),
+  );
+  const messageId = message?.result?.message_id || null;
+  lead.ui = { ...(lead.ui || {}), promptMessageId: messageId };
+  await saveSession(chatId, lead);
+  return message;
+}
+
+async function resetConversation(config, chatId, lead, userMessageId) {
+  await cleanupActivePrompt(config, chatId, lead, userMessageId);
+  await clearSession(chatId);
+  await sendMessage(config, chatId, "Progress cleared. Send /start to begin again.", { remove_keyboard: true });
 }
 
 async function finalizeLead(config, lead) {
@@ -135,6 +174,7 @@ export async function createLeadFromLanding(config, input) {
 export async function handleTelegramUpdate(config, update) {
   const chatId = chatIdOf(update);
   const text = textOf(update);
+  const userMessageId = messageIdOf(update);
   if (!chatId || !text) return { ok: true, ignored: true };
 
   if (text === "/help") {
@@ -146,9 +186,9 @@ export async function handleTelegramUpdate(config, update) {
     return { ok: true };
   }
 
-  if (text === "/reset") {
-    await clearSession(chatId);
-    await sendMessage(config, chatId, "Progress cleared. Send /start to begin again.");
+  if (text === "/reset" || text === "Reset") {
+    const lead = await getSession(chatId);
+    await resetConversation(config, chatId, lead, userMessageId);
     return { ok: true };
   }
 
@@ -161,21 +201,35 @@ export async function handleTelegramUpdate(config, update) {
 
   let lead = await getSession(chatId);
   if (!lead || text === "/start") {
+    if (lead) await cleanupActivePrompt(config, chatId, lead, userMessageId);
+    else await deleteMessage(config, chatId, userMessageId);
     lead = buildSessionFromTelegram(update);
-    await saveSession(chatId, lead);
     const question = nextQuestion(lead.answers);
-    await sendMessage(
+    await askQuestion(
       config,
       chatId,
-      `Hi. I will ask a few questions and build a lead profile for the admissions manager.\n\n${question.prompt}`,
-      makeReplyMarkup(question),
+      lead,
+      question,
+      "Hi. I will ask a few questions and build a lead profile for the admissions manager.",
     );
     return { ok: true, started: true };
+  }
+
+  if (text === "Back") {
+    await cleanupActivePrompt(config, chatId, lead, userMessageId);
+    const previous = previousAnsweredQuestion(lead.answers);
+    if (previous) {
+      lead.answers[previous.key] = "";
+    }
+    const question = previous || nextQuestion(lead.answers);
+    await askQuestion(config, chatId, lead, question);
+    return { ok: true, wentBack: Boolean(previous), question: question.key };
   }
 
   const question = nextQuestion(lead.answers);
   if (!question) {
     if (lead.finalizingAt) {
+      await deleteMessage(config, chatId, userMessageId);
       await sendMessage(config, chatId, "I am already preparing the lead profile. One moment.", {
         remove_keyboard: true,
       });
@@ -185,16 +239,19 @@ export async function handleTelegramUpdate(config, update) {
     await saveSession(chatId, lead);
     const result = await finalizeLead(config, lead);
     await clearSession(chatId);
-    await sendMessage(config, chatId, result.clientReply, { remove_keyboard: true });
+    await sendMessage(config, chatId, `${formatLeadSummary(lead, result.scoring)}\n\n${result.clientReply}`, {
+      remove_keyboard: true,
+    });
     return { ok: true, completed: true, result };
   }
 
+  await cleanupActivePrompt(config, chatId, lead, userMessageId);
   lead.answers[question.key] = text;
   await saveSession(chatId, lead);
 
   const followUp = nextQuestion(lead.answers);
   if (followUp) {
-    await sendMessage(config, chatId, followUp.prompt, makeReplyMarkup(followUp));
+    await askQuestion(config, chatId, lead, followUp);
     return { ok: true, answered: question.key, next: followUp.key };
   }
 
@@ -202,6 +259,8 @@ export async function handleTelegramUpdate(config, update) {
   await saveSession(chatId, lead);
   const result = await finalizeLead(config, lead);
   await clearSession(chatId);
-  await sendMessage(config, chatId, result.clientReply, { remove_keyboard: true });
+  await sendMessage(config, chatId, `${formatLeadSummary(lead, result.scoring)}\n\n${formatClientReply(result.scoring)}`, {
+    remove_keyboard: true,
+  });
   return { ok: true, completed: true, result };
 }

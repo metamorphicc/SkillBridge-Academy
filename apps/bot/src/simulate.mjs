@@ -14,6 +14,7 @@ const chat = {
 };
 
 const updates = [
+  "/reset",
   "/start",
   "Change career",
   "Beginner",
