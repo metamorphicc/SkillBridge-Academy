@@ -883,6 +883,11 @@ dd {
   font-weight: 750;
 }
 
+.form-status.is-warning {
+  color: var(--color-next-deep);
+  font-weight: 750;
+}
+
 .form-status.is-error {
   color: var(--color-hot-deep);
   font-weight: 750;

@@ -218,10 +218,10 @@
         }
 
         const intakeScore = scoreMap.intake;
-        hideRequestStatus();
+        showRequestStatus("Request sent. The manager brief is being prepared.", "is-success");
         setText("submit-contact", contact);
-        setText("submit-route", need === "Manager alerts" ? "Manager alert setup" : "Telegram qualification");
-        setText("submit-status", result.scoring?.status === "intake" ? "Waiting for bot answers" : "Saved");
+        setText("submit-route", need);
+        setText("submit-status", "Qualification and follow-up are queued.");
         if (submitResult) submitResult.hidden = false;
 
         setText("profile-title", intakeScore.title);
@@ -235,12 +235,8 @@
         setText("telegram-action", intakeScore.telegramAction);
         setText("crm-name", name);
         setScore("crm-score", intakeScore);
-
-        window.setTimeout(() => {
-          document.getElementById("qualification")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-        }, 700);
       } catch (submitError) {
-        showRequestStatus(`${submitError.message} If the API is not running, start it with node scripts/dev-server.mjs.`, "is-error");
+        showRequestStatus(submitError.message || "Request was not sent. Please check the fields and try again.", "is-error");
       } finally {
         if (submitButton) submitButton.disabled = false;
       }
