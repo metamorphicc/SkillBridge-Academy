@@ -1,2 +1,3 @@
-Дата заявки,Имя,Телефон,Telegram,Цель,Уровень,Старт,Формат,Бюджет,Score,Статус,Источник
-2026-08-10 12:00,Анна,+79000000000,@anna,Сменить профессию,Начальный,7 дней,Группа,Готов обсуждать,hot,new,landing_form
+event,createdAt,qualifiedAt,name,school,contact,need,goal,level,start,format,budget,contactTime,score,points,status,nextAction,source,managerAlert,followUp,ragSources
+lead.created,2026-08-10T00:00:00.000Z,,Anna Petrova,Online design academy,@anna,Lead qualification,,,,,,,pending,0,intake,Continue qualification in Telegram.,landing_form,after_qualification,qualification,pricing-readiness|follow-up-policy
+lead.qualified,2026-08-10T00:00:00.000Z,2026-08-10T00:08:00.000Z,Anna Petrova,SkillBridge Academy lead,@anna,Lead qualification,Change career,Beginner,Within 7 days,Group,Ready to discuss,Today,hot,100,new,Contact urgently and offer available call slots.,telegram_bot,urgent,call_window,format-group|pricing-readiness

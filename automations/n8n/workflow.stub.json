@@ -5,18 +5,18 @@
       "name": "Lead Event Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [120, 240],
+      "position": [120, 260],
       "parameters": {
         "path": "skillbridge/lead-events",
         "httpMethod": "POST",
-        "responseMode": "responseNode"
+        "responseMode": "onReceived"
       }
     },
     {
       "name": "Validate Secret",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [380, 240],
+      "position": [380, 260],
       "parameters": {
         "conditions": {
           "string": [
@@ -33,66 +33,156 @@
       "name": "Append Google Sheets Row",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [660, 160],
+      "position": [660, 180],
       "parameters": {
         "operation": "append",
-        "sheetName": "Leads"
+        "sheetName": "Leads",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event": "={{$json.body.event}}",
+            "createdAt": "={{$json.body.lead.createdAt}}",
+            "qualifiedAt": "={{$json.body.lifecycle.qualifiedAt || ''}}",
+            "name": "={{$json.body.lead.name}}",
+            "school": "={{$json.body.lead.school}}",
+            "contact": "={{$json.body.lead.contact}}",
+            "need": "={{$json.body.lead.need}}",
+            "goal": "={{$json.body.lead.answers.goal}}",
+            "level": "={{$json.body.lead.answers.level}}",
+            "start": "={{$json.body.lead.answers.start}}",
+            "format": "={{$json.body.lead.answers.format}}",
+            "budget": "={{$json.body.lead.answers.budget}}",
+            "contactTime": "={{$json.body.lead.answers.contactTime}}",
+            "score": "={{$json.body.scoring.score}}",
+            "points": "={{$json.body.scoring.points}}",
+            "status": "={{$json.body.scoring.status}}",
+            "nextAction": "={{$json.body.scoring.nextAction}}",
+            "source": "={{$json.body.lead.source}}",
+            "managerAlert": "={{$json.body.routing.managerAlert}}",
+            "followUp": "={{$json.body.routing.followUp}}",
+            "ragSources": "={{$json.body.rag.sources.join('|')}}"
+          }
+        }
       }
     },
     {
-      "name": "Is Qualified",
+      "name": "Is Intake",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [920, 160],
+      "position": [940, 180],
       "parameters": {
         "conditions": {
           "string": [
             {
               "value1": "={{$json.event}}",
               "operation": "equals",
-              "value2": "lead.qualified"
+              "value2": "lead.created"
             }
           ]
         }
       }
     },
     {
-      "name": "Notify Manager",
+      "name": "Notify Intake",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [1180, 60],
+      "position": [1220, 40],
       "parameters": {
         "operation": "sendMessage",
-        "text": "={{'New ' + $json.scoring.score.toUpperCase() + ' lead: ' + $json.lead.name + '\\nContact: ' + $json.lead.contact + '\\nNext: ' + $json.scoring.nextAction}}"
+        "text": "={{'New intake lead\\nName: ' + $json.name + '\\nSchool: ' + $json.school + '\\nContact: ' + $json.contact + '\\nNeed: ' + $json.need + '\\nNext: continue qualification in Telegram.'}}"
       }
     },
     {
-      "name": "Create Follow-up",
+      "name": "Wait For Qualification",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1420, 60],
+      "position": [1500, 40],
       "parameters": {}
     },
     {
-      "name": "Respond OK",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [1660, 220],
+      "name": "Is Hot",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1220, 280],
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\"ok\":true}"
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.score}}",
+              "operation": "equals",
+              "value2": "hot"
+            }
+          ]
+        }
       }
     },
     {
-      "name": "Respond Unauthorized",
-      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Notify Hot Manager",
+      "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [660, 360],
+      "position": [1500, 180],
       "parameters": {
-        "respondWith": "json",
-        "responseCode": 401,
-        "responseBody": "={\"ok\":false,\"error\":\"invalid secret\"}"
+        "operation": "sendMessage",
+        "text": "={{'HOT lead - call first\\nName: ' + $json.name + '\\nContact: ' + $json.contact + '\\nGoal: ' + $json.goal + '\\nStart: ' + $json.start + '\\nBudget: ' + $json.budget + '\\nNext: ' + $json.nextAction}}"
       }
+    },
+    {
+      "name": "Create Call Window Follow-up",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1780, 180],
+      "parameters": {}
+    },
+    {
+      "name": "Is Warm",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1500, 420],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.score}}",
+              "operation": "equals",
+              "value2": "warm"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Notify Warm Manager",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1780, 340],
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "={{'WARM lead - write today\\nName: ' + $json.name + '\\nContact: ' + $json.contact + '\\nGoal: ' + $json.goal + '\\nStart: ' + $json.start + '\\nNext: ' + $json.nextAction}}"
+      }
+    },
+    {
+      "name": "Create Fit Questions Follow-up",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2060, 340],
+      "parameters": {}
+    },
+    {
+      "name": "Notify Cold Manager",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1780, 540],
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "={{'COLD lead - add to nurture\\nName: ' + $json.name + '\\nContact: ' + $json.contact + '\\nGoal: ' + $json.goal + '\\nStart: ' + $json.start + '\\nNext: ' + $json.nextAction}}"
+      }
+    },
+    {
+      "name": "Create Nurture Follow-up",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2060, 540],
+      "parameters": {}
     }
   ],
   "connections": {
@@ -102,23 +192,41 @@
     "Validate Secret": {
       "main": [
         [{ "node": "Append Google Sheets Row", "type": "main", "index": 0 }],
-        [{ "node": "Respond Unauthorized", "type": "main", "index": 0 }]
+        []
       ]
     },
     "Append Google Sheets Row": {
-      "main": [[{ "node": "Is Qualified", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Is Intake", "type": "main", "index": 0 }]]
     },
-    "Is Qualified": {
+    "Is Intake": {
       "main": [
-        [{ "node": "Notify Manager", "type": "main", "index": 0 }],
-        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+        [{ "node": "Notify Intake", "type": "main", "index": 0 }],
+        [{ "node": "Is Hot", "type": "main", "index": 0 }]
       ]
     },
-    "Notify Manager": {
-      "main": [[{ "node": "Create Follow-up", "type": "main", "index": 0 }]]
+    "Notify Intake": {
+      "main": [[{ "node": "Wait For Qualification", "type": "main", "index": 0 }]]
     },
-    "Create Follow-up": {
-      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    "Is Hot": {
+      "main": [
+        [{ "node": "Notify Hot Manager", "type": "main", "index": 0 }],
+        [{ "node": "Is Warm", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Hot Manager": {
+      "main": [[{ "node": "Create Call Window Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Is Warm": {
+      "main": [
+        [{ "node": "Notify Warm Manager", "type": "main", "index": 0 }],
+        [{ "node": "Notify Cold Manager", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Warm Manager": {
+      "main": [[{ "node": "Create Fit Questions Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Notify Cold Manager": {
+      "main": [[{ "node": "Create Nurture Follow-up", "type": "main", "index": 0 }]]
     }
   }
 }

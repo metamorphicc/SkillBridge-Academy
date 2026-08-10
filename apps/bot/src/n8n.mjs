@@ -1,4 +1,4 @@
-export function buildN8nPayload(lead, scoring, ragSources = [], event = "lead.qualified") {
+export function buildN8nPayload(lead, scoring, ragSources = [], event = "lead.qualified", meta = {}) {
   return {
     event,
     version: "1.0",
@@ -16,6 +16,9 @@ export function buildN8nPayload(lead, scoring, ragSources = [], event = "lead.qu
     scoring,
     rag: {
       sources: ragSources,
+    },
+    lifecycle: {
+      qualifiedAt: meta.qualifiedAt || null,
     },
     routing: {
       crm: "google_sheets_or_local_csv",
@@ -44,14 +47,24 @@ export async function sendToN8n(config, payload) {
     return { ok: false, skipped: true, reason: "N8N_LEAD_WEBHOOK_URL is not configured" };
   }
 
-  const response = await fetch(config.n8nLeadWebhookUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-SkillBridge-Secret": config.n8nWebhookSecret,
-    },
-    body: JSON.stringify(payload),
-  });
+  const timeoutMs = Number.isFinite(config.n8nTimeoutMs) ? config.n8nTimeoutMs : 2500;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response;
+  try {
+    response = await fetch(config.n8nLeadWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-SkillBridge-Secret": config.n8nWebhookSecret,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const body = await response.text();
   if (!response.ok) {

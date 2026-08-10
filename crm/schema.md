@@ -6,7 +6,9 @@ Production target: Google Sheets with the same columns.
 
 | Column | Meaning |
 | --- | --- |
+| `event` | `lead.created` for landing intake, `lead.qualified` after bot qualification |
 | `createdAt` | ISO timestamp when lead entered the system |
+| `qualifiedAt` | ISO timestamp when the bot qualification completed |
 | `name` | Lead name |
 | `school` | School, academy, bootcamp, or project name |
 | `contact` | Telegram, phone, or email |
@@ -22,3 +24,6 @@ Production target: Google Sheets with the same columns.
 | `status` | Lead state, starts as `intake`, then `new` after qualification |
 | `nextAction` | Manager action suggested by scoring |
 | `source` | `landing_form`, `telegram_bot`, etc. |
+| `managerAlert` | n8n routing priority for manager notification |
+| `followUp` | Follow-up route: qualification, call window, fit questions, intro material |
+| `ragSources` | Knowledge-base source ids used for the lead brief |

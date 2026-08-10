@@ -29,12 +29,18 @@ function buildSessionFromTelegram(update) {
 }
 
 async function finalizeLead(config, lead) {
+  const qualifiedAt = new Date().toISOString();
   const scoring = scoreLead(lead);
   const rag = await answerWithRag(
     `${lead.need} ${Object.values(lead.answers || {}).join(" ")} ${scoring.nextAction}`,
   );
-  await appendLead(lead, scoring);
-  const payload = buildN8nPayload(lead, scoring, rag.sources);
+  const payload = buildN8nPayload(lead, scoring, rag.sources, "lead.qualified", { qualifiedAt });
+  await appendLead(lead, scoring, {
+    event: payload.event,
+    routing: payload.routing,
+    ragSources: rag.sources,
+    qualifiedAt,
+  });
 
   const deliveries = {
     manager: null,
@@ -84,7 +90,11 @@ export async function createLeadFromLanding(config, input) {
   const rag = await answerWithRag(`${lead.need} ${input.school || ""}`);
   const payload = buildN8nPayload(lead, scoring, rag.sources, "lead.created");
 
-  await appendLead(lead, scoring);
+  await appendLead(lead, scoring, {
+    event: payload.event,
+    routing: payload.routing,
+    ragSources: rag.sources,
+  });
 
   const deliveries = {
     manager: null,
@@ -165,6 +175,14 @@ export async function handleTelegramUpdate(config, update) {
 
   const question = nextQuestion(lead.answers);
   if (!question) {
+    if (lead.finalizingAt) {
+      await sendMessage(config, chatId, "I am already preparing the lead profile. One moment.", {
+        remove_keyboard: true,
+      });
+      return { ok: true, finalizing: true };
+    }
+    lead.finalizingAt = new Date().toISOString();
+    await saveSession(chatId, lead);
     const result = await finalizeLead(config, lead);
     await clearSession(chatId);
     await sendMessage(config, chatId, result.clientReply, { remove_keyboard: true });
@@ -180,6 +198,8 @@ export async function handleTelegramUpdate(config, update) {
     return { ok: true, answered: question.key, next: followUp.key };
   }
 
+  lead.finalizingAt = new Date().toISOString();
+  await saveSession(chatId, lead);
   const result = await finalizeLead(config, lead);
   await clearSession(chatId);
   await sendMessage(config, chatId, result.clientReply, { remove_keyboard: true });

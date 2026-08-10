@@ -18,11 +18,11 @@ A visitor lands on the course page, leaves a request, then a Telegram bot qualif
 ## Target Workflow
 
 1. Visitor submits a form on the landing.
-2. Bot asks goal, level, start date, format, budget, and contact preference.
-3. Lead gets a score: hot, warm, or cold.
-4. Data goes to Google Sheets CRM.
-5. Manager gets a Telegram alert with priority and next action.
-6. Follow-up reminder is created if the lead does not book a call.
+2. n8n writes `lead.created` to Google Sheets and sends an intake manager alert.
+3. Bot asks goal, level, start date, format, budget, and contact preference.
+4. Lead gets a score: hot, warm, or cold.
+5. n8n writes `lead.qualified` to Google Sheets and routes the manager alert by score.
+6. Follow-up route is selected: call window, fit questions, or nurture.
 
 ## Structure
 

@@ -45,26 +45,35 @@ export async function clearSession(chatId) {
 }
 
 const csv = (value) => `"${String(value || "").replace(/"/g, '""')}"`;
+const crmHeader =
+  "event,createdAt,qualifiedAt,name,school,contact,need,goal,level,start,format,budget,contactTime,score,points,status,nextAction,source,managerAlert,followUp,ragSources\n";
 
-export async function appendLead(lead, scoring) {
+export async function appendLead(lead, scoring, meta = {}) {
   await ensureStorage();
   const current = await readJson(crmJsonPath, []);
+  const routing = meta.routing || {};
   const row = {
     ...lead,
+    event: meta.event || "lead.qualified",
     score: scoring.score,
     points: scoring.points,
     status: scoring.status,
     nextAction: scoring.nextAction,
     reasons: scoring.reasons,
+    routing,
+    followUp: routing.followUp || "",
+    managerAlert: routing.managerAlert || "",
+    ragSources: meta.ragSources || [],
+    qualifiedAt: meta.qualifiedAt || "",
   };
   current.unshift(row);
   await writeJson(crmJsonPath, current);
 
   const answers = lead.answers || {};
-  const header =
-    "createdAt,name,school,contact,need,goal,level,start,format,budget,contactTime,score,points,status,nextAction,source\n";
   const line = [
+    row.event,
     lead.createdAt,
+    row.qualifiedAt,
     lead.name,
     lead.school,
     lead.contact,
@@ -80,11 +89,15 @@ export async function appendLead(lead, scoring) {
     scoring.status,
     scoring.nextAction,
     lead.source,
+    row.managerAlert,
+    row.followUp,
+    row.ragSources.join("|"),
   ]
     .map(csv)
     .join(",");
 
   const existingCsv = await readFile(crmCsvPath, "utf8").catch(() => "");
-  await appendFile(crmCsvPath, `${existingCsv ? "" : header}${line}\n`, "utf8");
+  const hasCurrentHeader = existingCsv.includes(crmHeader.trim());
+  await appendFile(crmCsvPath, `${hasCurrentHeader ? "" : crmHeader}${line}\n`, "utf8");
   return row;
 }

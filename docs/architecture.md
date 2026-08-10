@@ -3,11 +3,17 @@
 ```mermaid
 flowchart LR
   A["Landing form"] --> B["API lead endpoint"]
-  B --> C["Telegram qualification bot"]
-  C --> D["Lead scoring"]
-  D --> E["Google Sheets CRM"]
-  D --> F["Manager Telegram alert"]
-  D --> G["n8n follow-up workflow"]
+  B --> C["n8n lead.created"]
+  C --> D["Google Sheets intake row"]
+  C --> E["Intake manager alert"]
+  B --> F["Telegram qualification bot"]
+  F --> G["Lead scoring"]
+  G --> H["n8n lead.qualified"]
+  H --> I["Google Sheets qualified row"]
+  H --> J{"Score route"}
+  J --> K["Hot: call first"]
+  J --> L["Warm: write today"]
+  J --> M["Cold: nurture"]
 ```
 
 ## Main Services
@@ -18,6 +24,7 @@ flowchart LR
 - Scoring: hot/warm/cold priority and next action.
 - CRM: local CSV/JSON fallback now, Google Sheets target for n8n.
 - n8n: duplicate checks, Google Sheets append, Telegram alerts, reminders, and workflow visibility.
+- Event model: `lead.created` for intake rows, `lead.qualified` for scored bot rows.
 
 ## Current Local Endpoints
 

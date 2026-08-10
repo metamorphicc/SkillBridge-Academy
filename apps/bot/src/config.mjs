@@ -34,6 +34,7 @@ export function getConfig() {
     telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET || "",
     n8nLeadWebhookUrl: process.env.N8N_LEAD_WEBHOOK_URL || "",
     n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || "skillbridge-local-secret",
+    n8nTimeoutMs: Number.parseInt(process.env.N8N_TIMEOUT_MS || "2500", 10),
     publicSiteUrl: process.env.PUBLIC_SITE_URL || "http://127.0.0.1:5173/apps/landing/",
     port: Number.parseInt(process.env.BOT_PORT || "8787", 10),
     host: process.env.BOT_HOST || "127.0.0.1",

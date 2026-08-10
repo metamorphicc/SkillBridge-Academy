@@ -29,6 +29,9 @@
   "rag": {
     "sources": ["program-product-analytics", "pricing-readiness", "follow-up-policy"]
   },
+  "lifecycle": {
+    "qualifiedAt": "2026-08-10T00:08:00.000Z"
+  },
   "routing": {
     "crm": "google_sheets_or_local_csv",
     "managerAlert": "urgent",

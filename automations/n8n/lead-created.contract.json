@@ -29,6 +29,9 @@
   "rag": {
     "sources": ["pricing-readiness", "follow-up-policy"]
   },
+  "lifecycle": {
+    "qualifiedAt": null
+  },
   "routing": {
     "crm": "google_sheets_or_local_csv",
     "managerAlert": "after_qualification",

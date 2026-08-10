@@ -1,7 +1,12 @@
 import { getConfig } from "./config.mjs";
 import { handleTelegramUpdate } from "./bot.mjs";
 
-const config = getConfig();
+const config = {
+  ...getConfig(),
+  botToken: "",
+  adminChatId: "",
+  n8nLeadWebhookUrl: "",
+};
 const chat = {
   id: 10001,
   first_name: "Anna",
