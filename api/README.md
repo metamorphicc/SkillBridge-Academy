@@ -73,6 +73,22 @@ admin session cookie from `/api/admin/login`.
 }
 ```
 
+### `PATCH /api/leads/:id`
+
+Updates manager-only local CRM fields for the protected dashboard. The `id`
+is the row `eventId` when available, otherwise the lead `id`.
+
+```json
+{
+  "pipelineStatus": "contacted",
+  "owner": "Admissions manager",
+  "managerNote": "Asked for available call windows."
+}
+```
+
+Allowed statuses: `new`, `needs_qualification`, `contacted`, `no_answer`,
+`won`, `lost`, `nurture`.
+
 ## Deployment note
 
 The code is written with Node built-ins only, so it can be moved into Vercel

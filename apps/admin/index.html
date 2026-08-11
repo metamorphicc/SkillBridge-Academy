@@ -36,32 +36,33 @@
           <p class="eyebrow">Manager dashboard</p>
           <h1 id="page-title">Admissions queue</h1>
         </div>
-        <div class="hero__note">
-          <span>Live local CRM</span>
-          <b id="total-leads">0 leads</b>
+        <div class="hero__note" aria-label="Pipeline status">
+          <span>Needs action</span>
+          <b id="needs-action">0</b>
+          <small id="total-leads">0 leads</small>
         </div>
       </section>
 
       <section class="metrics" aria-label="Lead metrics">
+        <article>
+          <span>Open</span>
+          <b id="metric-open">0</b>
+          <small>Active queue</small>
+        </article>
         <article>
           <span>Hot</span>
           <b id="metric-hot">0</b>
           <small>Call first</small>
         </article>
         <article>
-          <span>Warm</span>
-          <b id="metric-warm">0</b>
-          <small>Write today</small>
+          <span>Contacted</span>
+          <b id="metric-contacted">0</b>
+          <small>In conversation</small>
         </article>
         <article>
-          <span>Cold</span>
-          <b id="metric-cold">0</b>
-          <small>Nurture</small>
-        </article>
-        <article>
-          <span>Intake</span>
-          <b id="metric-pending">0</b>
-          <small>Needs bot answers</small>
+          <span>Won</span>
+          <b id="metric-won">0</b>
+          <small>Closed positive</small>
         </article>
       </section>
 
@@ -86,7 +87,7 @@
               <p class="eyebrow">CRM stream</p>
               <h2 id="leads-title">Latest leads</h2>
             </div>
-            <div class="tabs" aria-label="Lead filters">
+            <div class="tabs" aria-label="Score filters">
               <button class="tab is-active" type="button" data-filter="all">All</button>
               <button class="tab" type="button" data-filter="hot">Hot</button>
               <button class="tab" type="button" data-filter="warm">Warm</button>
@@ -95,16 +96,59 @@
             </div>
           </div>
 
+          <div class="filterbar" aria-label="Manager filters">
+            <label>
+              <span>Status</span>
+              <select id="status-filter">
+                <option value="all">All statuses</option>
+                <option value="new">New</option>
+                <option value="needs_qualification">Needs qualification</option>
+                <option value="contacted">Contacted</option>
+                <option value="no_answer">No answer</option>
+                <option value="won">Won</option>
+                <option value="lost">Lost</option>
+                <option value="nurture">Nurture</option>
+              </select>
+            </label>
+            <label>
+              <span>Route</span>
+              <select id="follow-filter">
+                <option value="all">All routes</option>
+                <option value="qualification">Qualification</option>
+                <option value="call_window">Call window</option>
+                <option value="fit_questions">Fit questions</option>
+                <option value="intro_material">Nurture material</option>
+                <option value="unrouted">Unrouted</option>
+              </select>
+            </label>
+            <label class="search-field">
+              <span>Search</span>
+              <input id="search-input" type="search" autocomplete="off" placeholder="Name, school, contact" />
+            </label>
+          </div>
+
           <div class="lead-table" role="table" aria-label="Latest lead rows">
             <div class="lead-table__head" role="row">
               <span role="columnheader">Lead</span>
               <span role="columnheader">Signal</span>
               <span role="columnheader">Score</span>
-              <span role="columnheader">Next</span>
+              <span role="columnheader">Stage</span>
             </div>
             <div id="lead-rows"></div>
           </div>
         </article>
+
+        <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-title">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Lead profile</p>
+              <h2 id="detail-title">Select a lead</h2>
+            </div>
+          </div>
+          <div id="lead-detail" class="lead-detail">
+            <p class="empty">Choose a row to see answers, next action, and manager controls.</p>
+          </div>
+        </aside>
       </section>
     </main>
 

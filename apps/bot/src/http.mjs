@@ -2,7 +2,7 @@ import { getConfig } from "./config.mjs";
 import { clearAdminCookie, createAdminCookie, isAdminAuthenticated, isAdminPasswordValid } from "./admin-auth.mjs";
 import { createLeadFromLanding, handleTelegramUpdate } from "./bot.mjs";
 import { answerWithRag } from "./rag.mjs";
-import { buildLeadStats, listLeads } from "./storage.mjs";
+import { buildLeadStats, listLeads, updateLead } from "./storage.mjs";
 
 export async function readJsonBody(request) {
   const chunks = [];
@@ -131,6 +131,36 @@ export async function handleApiRequest(request, response, config = getConfig()) 
       const limit = Number.parseInt(url.searchParams.get("limit") || "100", 10);
       const leads = await listLeads(Number.isFinite(limit) ? limit : 100);
       sendJson(response, 200, { ok: true, stats: buildLeadStats(leads), leads }, corsHeaders());
+    } catch (error) {
+      sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
+    }
+    return true;
+  }
+
+  if (url.pathname.startsWith("/api/leads/") && request.method === "PATCH") {
+    try {
+      if (!isAdminAuthenticated(request, config)) {
+        sendJson(response, 401, { ok: false, error: "Admin login required." }, corsHeaders());
+        return true;
+      }
+      const id = decodeURIComponent(url.pathname.replace("/api/leads/", ""));
+      const body = await readJsonBody(request);
+      const allowedStatuses = new Set(["new", "needs_qualification", "contacted", "no_answer", "won", "lost", "nurture"]);
+      if (body.pipelineStatus && !allowedStatuses.has(body.pipelineStatus)) {
+        sendJson(response, 422, { ok: false, error: "Invalid lead status." }, corsHeaders());
+        return true;
+      }
+      const lead = await updateLead(id, {
+        pipelineStatus: body.pipelineStatus,
+        owner: body.owner,
+        managerNote: body.managerNote,
+      });
+      if (!lead) {
+        sendJson(response, 404, { ok: false, error: "Lead not found." }, corsHeaders());
+        return true;
+      }
+      const leads = await listLeads(200);
+      sendJson(response, 200, { ok: true, lead, stats: buildLeadStats(leads) }, corsHeaders());
     } catch (error) {
       sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
     }

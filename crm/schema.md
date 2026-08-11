@@ -29,3 +29,16 @@ Production target: Google Sheets with the same columns.
 | `managerAlert` | n8n routing priority for manager notification |
 | `followUp` | Follow-up route: qualification, call window, fit questions, intro material |
 | `ragSources` | Knowledge-base source ids used for the lead brief |
+
+## Local Dashboard Fields
+
+These fields are stored in `crm/leads.local.json` by the protected manager
+dashboard. They are intentionally separate from the Google Sheets event row
+contract.
+
+| Field | Meaning |
+| --- | --- |
+| `pipelineStatus` | Manager workflow state: new, needs qualification, contacted, no answer, won, lost, nurture |
+| `owner` | Manager responsible for the lead |
+| `managerNote` | Local manager note for the next touch |
+| `updatedAt` | ISO timestamp of the last dashboard update |

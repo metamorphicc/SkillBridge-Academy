@@ -49,32 +49,74 @@ export async function listLeads(limit = 100) {
   return leads.slice(0, limit);
 }
 
+export async function updateLead(id, patch = {}) {
+  await ensureStorage();
+  const leads = await readJson(crmJsonPath, []);
+  const key = String(id || "");
+  const index = leads.findIndex((lead) => String(lead.eventId || lead.id || "") === key);
+  if (index === -1) return null;
+
+  const current = leads[index];
+  const next = {
+    ...current,
+    pipelineStatus: patch.pipelineStatus || current.pipelineStatus || defaultPipelineStatus(current),
+    owner: patch.owner === undefined ? current.owner || "" : String(patch.owner || "").trim(),
+    managerNote: patch.managerNote === undefined ? current.managerNote || "" : String(patch.managerNote || "").trim(),
+    updatedAt: new Date().toISOString(),
+  };
+  leads[index] = next;
+  await writeJson(crmJsonPath, leads);
+  return next;
+}
+
+function defaultPipelineStatus(lead) {
+  if (lead.pipelineStatus) return lead.pipelineStatus;
+  if (lead.status === "intake" || lead.score === "pending") return "needs_qualification";
+  return "new";
+}
+
 export function buildLeadStats(leads = []) {
   const initialScores = { pending: 0, hot: 0, warm: 0, cold: 0 };
   const initialEvents = { "lead.created": 0, "lead.qualified": 0 };
   const initialFollowUps = {};
+  const initialPipeline = {
+    new: 0,
+    needs_qualification: 0,
+    contacted: 0,
+    no_answer: 0,
+    won: 0,
+    lost: 0,
+    nurture: 0,
+  };
 
   const stats = leads.reduce(
     (acc, lead) => {
       const score = lead.score || "pending";
       const event = lead.event || "lead.qualified";
       const followUp = lead.followUp || lead.routing?.followUp || "unrouted";
+      const pipelineStatus = defaultPipelineStatus(lead);
 
       acc.total += 1;
       acc.scores[score] = (acc.scores[score] || 0) + 1;
       acc.events[event] = (acc.events[event] || 0) + 1;
       acc.followUps[followUp] = (acc.followUps[followUp] || 0) + 1;
+      acc.pipeline[pipelineStatus] = (acc.pipeline[pipelineStatus] || 0) + 1;
       if (lead.status === "intake") acc.openIntake += 1;
       if (event === "lead.qualified") acc.qualified += 1;
+      if (["new", "needs_qualification", "contacted", "no_answer"].includes(pipelineStatus)) acc.open += 1;
+      if (["new", "needs_qualification", "no_answer"].includes(pipelineStatus)) acc.needsAction += 1;
       return acc;
     },
     {
       total: 0,
       qualified: 0,
       openIntake: 0,
+      open: 0,
+      needsAction: 0,
       scores: { ...initialScores },
       events: { ...initialEvents },
       followUps: { ...initialFollowUps },
+      pipeline: { ...initialPipeline },
     },
   );
 
