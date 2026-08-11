@@ -85,3 +85,9 @@ Useful checks:
 node scripts/check.mjs
 node apps/bot/src/simulate.mjs
 ```
+
+Final handoff:
+
+```text
+docs/project-handoff.md
+```
