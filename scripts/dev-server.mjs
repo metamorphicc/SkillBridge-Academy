@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { createReadStream, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
+import { isAdminAuthenticated } from "../apps/bot/src/admin-auth.mjs";
 import { getConfig } from "../apps/bot/src/config.mjs";
 import { handleApiRequest } from "../apps/bot/src/http.mjs";
 
@@ -43,6 +44,22 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  const publicAdminPaths = new Set([
+    "/apps/admin/login.html",
+    "/apps/admin/login.css",
+    "/apps/admin/login.js",
+    "/apps/admin/styles.css",
+  ]);
+  if (
+    url.pathname.startsWith("/apps/admin") &&
+    !publicAdminPaths.has(url.pathname) &&
+    !isAdminAuthenticated(request, apiConfig)
+  ) {
+    response.writeHead(302, { Location: "/apps/admin/login.html" });
+    response.end();
+    return;
+  }
+
   const pathname = decodeURIComponent(url.pathname);
   const requestedPath = normalize(join(root, pathname));
 
@@ -54,7 +71,14 @@ const server = createServer(async (request, response) => {
   let filePath = requestedPath;
   try {
     const stats = statSync(filePath);
-    if (stats.isDirectory()) filePath = join(filePath, "index.html");
+    if (stats.isDirectory()) {
+      if (!url.pathname.endsWith("/")) {
+        response.writeHead(302, { Location: `${url.pathname}/${url.search}` });
+        response.end();
+        return;
+      }
+      filePath = join(filePath, "index.html");
+    }
   } catch {
     send(response, 404, "Not found");
     return;

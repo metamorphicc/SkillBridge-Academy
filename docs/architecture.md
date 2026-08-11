@@ -6,10 +6,12 @@ flowchart LR
   B --> C["n8n lead.created"]
   C --> D["Google Sheets intake row"]
   C --> E["Intake manager alert"]
+  D --> N["Protected manager dashboard"]
   B --> F["Telegram qualification bot"]
   F --> G["Lead scoring"]
   G --> H["n8n lead.qualified"]
   H --> I["Google Sheets qualified row"]
+  I --> N
   H --> J{"Score route"}
   J --> K["Hot: call first"]
   J --> L["Warm: write today"]
@@ -23,8 +25,10 @@ flowchart LR
 - Telegram bot: conversational qualification with 6 questions.
 - Scoring: hot/warm/cold priority and next action.
 - CRM: local CSV/JSON fallback now, Google Sheets target for n8n.
+- Manager dashboard: password-protected local operations view powered by `/api/leads`.
 - n8n: duplicate checks, Google Sheets append, Telegram alerts, reminders, and workflow visibility.
 - Event model: `lead.created` for intake rows, `lead.qualified` for scored bot rows.
+- Event identity: each webhook includes `eventId` and `emittedAt` for duplicate protection and audit trails.
 
 ## Current Local Endpoints
 
@@ -32,3 +36,7 @@ flowchart LR
 - `POST /api/lead`
 - `POST /api/telegram`
 - `POST /api/rag`
+- `GET /api/admin/session`
+- `POST /api/admin/login`
+- `POST /api/admin/logout`
+- `GET /api/leads`

@@ -44,9 +44,49 @@ export async function clearSession(chatId) {
   await writeJson(sessionsPath, sessions);
 }
 
+export async function listLeads(limit = 100) {
+  const leads = await readJson(crmJsonPath, []);
+  return leads.slice(0, limit);
+}
+
+export function buildLeadStats(leads = []) {
+  const initialScores = { pending: 0, hot: 0, warm: 0, cold: 0 };
+  const initialEvents = { "lead.created": 0, "lead.qualified": 0 };
+  const initialFollowUps = {};
+
+  const stats = leads.reduce(
+    (acc, lead) => {
+      const score = lead.score || "pending";
+      const event = lead.event || "lead.qualified";
+      const followUp = lead.followUp || lead.routing?.followUp || "unrouted";
+
+      acc.total += 1;
+      acc.scores[score] = (acc.scores[score] || 0) + 1;
+      acc.events[event] = (acc.events[event] || 0) + 1;
+      acc.followUps[followUp] = (acc.followUps[followUp] || 0) + 1;
+      if (lead.status === "intake") acc.openIntake += 1;
+      if (event === "lead.qualified") acc.qualified += 1;
+      return acc;
+    },
+    {
+      total: 0,
+      qualified: 0,
+      openIntake: 0,
+      scores: { ...initialScores },
+      events: { ...initialEvents },
+      followUps: { ...initialFollowUps },
+    },
+  );
+
+  return {
+    ...stats,
+    latest: leads.slice(0, 8),
+  };
+}
+
 const csv = (value) => `"${String(value || "").replace(/"/g, '""')}"`;
 const crmHeader =
-  "event,createdAt,qualifiedAt,name,school,contact,need,goal,level,start,format,budget,contactTime,score,points,status,nextAction,source,managerAlert,followUp,ragSources\n";
+  "event,eventId,emittedAt,createdAt,qualifiedAt,name,school,contact,need,goal,level,start,format,budget,contactTime,score,points,status,nextAction,source,managerAlert,followUp,ragSources\n";
 
 export async function appendLead(lead, scoring, meta = {}) {
   await ensureStorage();
@@ -55,6 +95,8 @@ export async function appendLead(lead, scoring, meta = {}) {
   const row = {
     ...lead,
     event: meta.event || "lead.qualified",
+    eventId: meta.eventId || "",
+    emittedAt: meta.emittedAt || "",
     score: scoring.score,
     points: scoring.points,
     status: scoring.status,
@@ -72,6 +114,8 @@ export async function appendLead(lead, scoring, meta = {}) {
   const answers = lead.answers || {};
   const line = [
     row.event,
+    row.eventId,
+    row.emittedAt,
     lead.createdAt,
     row.qualifiedAt,
     lead.name,

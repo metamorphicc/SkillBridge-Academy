@@ -41,6 +41,8 @@
           "mappingMode": "defineBelow",
           "value": {
             "event": "={{$json.body.event}}",
+            "eventId": "={{$json.body.eventId}}",
+            "emittedAt": "={{$json.body.emittedAt}}",
             "createdAt": "={{$json.body.lead.createdAt}}",
             "qualifiedAt": "={{$json.body.lifecycle.qualifiedAt || ''}}",
             "name": "={{$json.body.lead.name}}",

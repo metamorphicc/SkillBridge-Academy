@@ -12,7 +12,8 @@ A visitor lands on the course page, leaves a request, then a Telegram bot qualif
 - Telegram bot that qualifies leads before the manager joins.
 - RAG knowledge lookup for program, format, budget, and follow-up answers.
 - CRM table in local CSV/JSON fallback now, Google Sheets target for n8n.
-- n8n workflow contract for lead routing, duplicate checks, alerts, and reminders.
+- Manager dashboard for queue stats, follow-up routes, and latest leads.
+- Importable n8n production workflow for lead routing, duplicate checks, alerts, and follow-up tasks.
 - Case-study documentation with screenshots and workflow explanation.
 
 ## Target Workflow
@@ -29,15 +30,28 @@ A visitor lands on the course page, leaves a request, then a Telegram bot qualif
 ```text
 apps/
   landing/        Public course landing page.
+  admin/          Manager dashboard for pipeline visibility.
   bot/            Telegram lead qualification bot.
 api/              Serverless endpoints for form and Telegram webhooks.
 automations/
-  n8n/            Importable n8n workflow and setup notes.
+  n8n/            Importable production workflow, contracts, and setup notes.
 crm/              CRM schema, sample rows, and local fallback format.
 docs/             Case study, architecture, offer, and demo script.
 assets/           Images, icons, screenshots, and brand materials.
 scripts/          Small maintenance/setup scripts.
 ```
+
+## n8n Workflow
+
+Import:
+
+```text
+automations/n8n/workflow.production.json
+```
+
+The workflow validates `X-SkillBridge-Secret`, normalizes the webhook payload,
+skips duplicate `eventId` values, appends Google Sheets rows, routes Telegram
+alerts by score, and creates structured follow-up task payloads.
 
 ## Portfolio Angle
 
@@ -53,7 +67,17 @@ Open:
 
 ```text
 http://127.0.0.1:5173/apps/landing/
+http://127.0.0.1:5173/apps/admin/
 ```
+
+The manager dashboard is protected by an admin login. Set these in `.env`:
+
+```powershell
+ADMIN_DASHBOARD_PASSWORD=replace_me_with_strong_password
+ADMIN_SESSION_SECRET=replace_me_with_long_random_text
+```
+
+`/api/leads` uses the same admin session, so the CRM stream is not readable without logging in.
 
 Useful checks:
 

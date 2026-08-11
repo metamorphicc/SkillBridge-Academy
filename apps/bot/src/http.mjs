@@ -1,6 +1,8 @@
 import { getConfig } from "./config.mjs";
+import { clearAdminCookie, createAdminCookie, isAdminAuthenticated, isAdminPasswordValid } from "./admin-auth.mjs";
 import { createLeadFromLanding, handleTelegramUpdate } from "./bot.mjs";
 import { answerWithRag } from "./rag.mjs";
+import { buildLeadStats, listLeads } from "./storage.mjs";
 
 export async function readJsonBody(request) {
   const chunks = [];
@@ -27,6 +29,13 @@ export function corsHeaders() {
   };
 }
 
+function sendWithCookie(response, status, body, cookie, extraHeaders = {}) {
+  sendJson(response, status, body, {
+    ...extraHeaders,
+    "Set-Cookie": cookie,
+  });
+}
+
 export async function handleApiRequest(request, response, config = getConfig()) {
   const url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
 
@@ -47,6 +56,30 @@ export async function handleApiRequest(request, response, config = getConfig()) 
       },
       corsHeaders(),
     );
+    return true;
+  }
+
+  if (url.pathname === "/api/admin/session" && request.method === "GET") {
+    sendJson(response, 200, { ok: true, authenticated: isAdminAuthenticated(request, config) }, corsHeaders());
+    return true;
+  }
+
+  if (url.pathname === "/api/admin/login" && request.method === "POST") {
+    try {
+      const body = await readJsonBody(request);
+      if (!isAdminPasswordValid(config, body.password)) {
+        sendJson(response, 401, { ok: false, error: "Invalid admin password." }, corsHeaders());
+        return true;
+      }
+      sendWithCookie(response, 200, { ok: true }, createAdminCookie(config), corsHeaders());
+    } catch (error) {
+      sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
+    }
+    return true;
+  }
+
+  if (url.pathname === "/api/admin/logout" && request.method === "POST") {
+    sendWithCookie(response, 200, { ok: true }, clearAdminCookie(), corsHeaders());
     return true;
   }
 
@@ -83,6 +116,21 @@ export async function handleApiRequest(request, response, config = getConfig()) 
       const body = await readJsonBody(request);
       const result = await answerWithRag(body.query || "");
       sendJson(response, 200, { ok: true, ...result }, corsHeaders());
+    } catch (error) {
+      sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
+    }
+    return true;
+  }
+
+  if (url.pathname === "/api/leads" && request.method === "GET") {
+    try {
+      if (!isAdminAuthenticated(request, config)) {
+        sendJson(response, 401, { ok: false, error: "Admin login required." }, corsHeaders());
+        return true;
+      }
+      const limit = Number.parseInt(url.searchParams.get("limit") || "100", 10);
+      const leads = await listLeads(Number.isFinite(limit) ? limit : 100);
+      sendJson(response, 200, { ok: true, stats: buildLeadStats(leads), leads }, corsHeaders());
     } catch (error) {
       sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
     }

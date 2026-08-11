@@ -1,5 +1,7 @@
 {
   "event": "lead.created",
+  "eventId": "lead.created:uuid:2026-08-10T00:00:00.000Z",
+  "emittedAt": "2026-08-10T00:00:01.000Z",
   "version": "1.0",
   "lead": {
     "id": "uuid",

@@ -1,5 +1,7 @@
 {
   "event": "lead.qualified",
+  "eventId": "lead.qualified:uuid:2026-08-10T00:08:00.000Z",
+  "emittedAt": "2026-08-10T00:08:01.000Z",
   "version": "1.0",
   "lead": {
     "id": "uuid",

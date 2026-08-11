@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="SkillBridge Academy manager dashboard for lead qualification." />
+    <title>SkillBridge Manager View</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/apps/admin/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="../landing/" aria-label="SkillBridge landing">
+          <span class="brand__mark">SB</span>
+          <span>SkillBridge</span>
+        </a>
+        <div class="topbar__meta">
+          <span id="sync-state">Loading</span>
+          <button class="icon-btn" id="refresh-button" type="button" aria-label="Refresh leads" title="Refresh">
+            Refresh
+          </button>
+          <button class="icon-btn" id="logout-button" type="button" aria-label="Log out" title="Log out">
+            Log out
+          </button>
+        </div>
+      </header>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Manager dashboard</p>
+          <h1 id="page-title">Admissions queue</h1>
+        </div>
+        <div class="hero__note">
+          <span>Live local CRM</span>
+          <b id="total-leads">0 leads</b>
+        </div>
+      </section>
+
+      <section class="metrics" aria-label="Lead metrics">
+        <article>
+          <span>Hot</span>
+          <b id="metric-hot">0</b>
+          <small>Call first</small>
+        </article>
+        <article>
+          <span>Warm</span>
+          <b id="metric-warm">0</b>
+          <small>Write today</small>
+        </article>
+        <article>
+          <span>Cold</span>
+          <b id="metric-cold">0</b>
+          <small>Nurture</small>
+        </article>
+        <article>
+          <span>Intake</span>
+          <b id="metric-pending">0</b>
+          <small>Needs bot answers</small>
+        </article>
+      </section>
+
+      <section class="ops-grid">
+        <article class="queue-panel" aria-labelledby="queue-title">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Follow-up routes</p>
+              <h2 id="queue-title">Next actions</h2>
+            </div>
+            <div class="mini-tabs" aria-label="Route filters">
+              <button class="mini-tab is-active" type="button" data-route-filter="active">Active</button>
+              <button class="mini-tab" type="button" data-route-filter="all">All</button>
+            </div>
+          </div>
+          <div class="queue-list" id="queue-list"></div>
+        </article>
+
+        <article class="table-panel" aria-labelledby="leads-title">
+          <div class="panel-head panel-head--split">
+            <div>
+              <p class="eyebrow">CRM stream</p>
+              <h2 id="leads-title">Latest leads</h2>
+            </div>
+            <div class="tabs" aria-label="Lead filters">
+              <button class="tab is-active" type="button" data-filter="all">All</button>
+              <button class="tab" type="button" data-filter="hot">Hot</button>
+              <button class="tab" type="button" data-filter="warm">Warm</button>
+              <button class="tab" type="button" data-filter="cold">Cold</button>
+              <button class="tab" type="button" data-filter="pending">Intake</button>
+            </div>
+          </div>
+
+          <div class="lead-table" role="table" aria-label="Latest lead rows">
+            <div class="lead-table__head" role="row">
+              <span role="columnheader">Lead</span>
+              <span role="columnheader">Signal</span>
+              <span role="columnheader">Score</span>
+              <span role="columnheader">Next</span>
+            </div>
+            <div id="lead-rows"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="/apps/admin/script.js"></script>
+  </body>
+</html>

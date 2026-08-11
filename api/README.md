@@ -43,6 +43,36 @@ Searches the local knowledge base.
 { "query": "what should warm leads receive?" }
 ```
 
+### `GET /api/admin/session`
+
+Returns whether the current browser has a valid admin dashboard session.
+
+### `POST /api/admin/login`
+
+Accepts `{ "password": "..." }`, checks `ADMIN_DASHBOARD_PASSWORD`, and sets
+a signed HttpOnly admin session cookie.
+
+### `POST /api/admin/logout`
+
+Clears the admin session cookie.
+
+### `GET /api/leads`
+
+Returns local CRM rows plus dashboard stats for the manager view. Requires the
+admin session cookie from `/api/admin/login`.
+
+```json
+{
+  "ok": true,
+  "stats": {
+    "total": 12,
+    "qualified": 5,
+    "openIntake": 7
+  },
+  "leads": []
+}
+```
+
 ## Deployment note
 
 The code is written with Node built-ins only, so it can be moved into Vercel

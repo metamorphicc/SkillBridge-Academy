@@ -1,6 +1,12 @@
 export function buildN8nPayload(lead, scoring, ragSources = [], event = "lead.qualified", meta = {}) {
+  const emittedAt = meta.emittedAt || new Date().toISOString();
+  const eventId =
+    meta.eventId || `${event}:${lead.id || lead.contact || "unknown"}:${meta.qualifiedAt || lead.createdAt || emittedAt}`;
+
   return {
     event,
+    eventId,
+    emittedAt,
     version: "1.0",
     lead: {
       id: lead.id,

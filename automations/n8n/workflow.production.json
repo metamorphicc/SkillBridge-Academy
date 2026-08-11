@@ -1,0 +1,332 @@
+{
+  "name": "SkillBridge Lead Events Pipeline - Production",
+  "nodes": [
+    {
+      "name": "Lead Event Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [120, 300],
+      "parameters": {
+        "path": "skillbridge/lead-events",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseCode": 202,
+        "responseData": "firstEntryJson"
+      },
+      "notes": "Use the Production URL in N8N_LEAD_WEBHOOK_URL after publishing the workflow."
+    },
+    {
+      "name": "Validate Secret",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [380, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$headers['x-skillbridge-secret']}}",
+              "operation": "equals",
+              "value2": "={{$env.N8N_WEBHOOK_SECRET || 'skillbridge-local-secret'}}"
+            }
+          ]
+        }
+      },
+      "notes": "Set N8N_WEBHOOK_SECRET in n8n to the same value as the app .env."
+    },
+    {
+      "name": "Prepare CRM Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 220],
+      "parameters": {
+        "jsCode": "const payload = $json.body?.event ? $json.body : $json;\nconst lead = payload.lead || {};\nconst answers = lead.answers || {};\nconst scoring = payload.scoring || {};\nconst routing = payload.routing || {};\nconst lifecycle = payload.lifecycle || {};\nconst rag = payload.rag || {};\nconst clean = (value, fallback = '') => value === undefined || value === null ? fallback : String(value);\nconst score = clean(scoring.score, 'pending').toLowerCase();\nconst event = clean(payload.event, score === 'pending' ? 'lead.created' : 'lead.qualified');\nconst createdAt = clean(lead.createdAt, new Date().toISOString());\nconst qualifiedAt = clean(lifecycle.qualifiedAt);\nconst contact = clean(lead.contact);\nconst eventId = clean(payload.eventId, `${event}:${lead.id || contact || 'unknown'}:${qualifiedAt || createdAt}`);\nconst row = {\n  event,\n  eventId,\n  emittedAt: clean(payload.emittedAt, new Date().toISOString()),\n  createdAt,\n  qualifiedAt,\n  name: clean(lead.name),\n  school: clean(lead.school),\n  contact,\n  need: clean(lead.need),\n  goal: clean(answers.goal),\n  level: clean(answers.level),\n  start: clean(answers.start),\n  format: clean(answers.format),\n  budget: clean(answers.budget),\n  contactTime: clean(answers.contactTime),\n  score,\n  points: Number(scoring.points || 0),\n  status: clean(scoring.status, score === 'pending' ? 'intake' : 'new'),\n  nextAction: clean(scoring.nextAction),\n  source: clean(lead.source),\n  managerAlert: clean(routing.managerAlert),\n  followUp: clean(routing.followUp),\n  ragSources: Array.isArray(rag.sources) ? rag.sources.join('|') : clean(rag.sources),\n};\nconst signal = [row.goal, row.start, row.budget].filter(Boolean).join(' / ') || row.need || 'No signal yet';\nconst intake = ['New intake lead', `Name: ${row.name || 'Unknown'}`, `School: ${row.school || 'Unknown'}`, `Contact: ${row.contact || 'No contact'}`, `Need: ${row.need || 'Not specified'}`, 'Status: waiting for qualification answers', 'Next action: continue qualification in Telegram.'].join('\\n');\nconst qualified = [`${row.score.toUpperCase()} lead`, `Name: ${row.name || 'Unknown'}`, `School: ${row.school || 'Unknown'}`, `Contact: ${row.contact || 'No contact'}`, `Goal: ${row.goal || 'Not answered'}`, `Level: ${row.level || 'Not answered'}`, `Start: ${row.start || 'Not answered'}`, `Format: ${row.format || 'Not answered'}`, `Budget: ${row.budget || 'Not answered'}`, `Contact time: ${row.contactTime || 'Not answered'}`, `Signal: ${signal}`, `Next action: ${row.nextAction || 'Review lead'}`].join('\\n');\nconst hot = ['HOT lead - call first', qualified].join('\\n\\n');\nconst warm = ['WARM lead - write today', qualified].join('\\n\\n');\nconst cold = ['COLD lead - add to nurture', qualified].join('\\n\\n');\nconst followUpTitles = { qualification: 'Wait for bot qualification', call_window: 'Create call window follow-up', fit_questions: 'Send fit questions follow-up', intro_material: 'Send nurture material' };\nconst followUpDue = { qualification: 'after bot completion', call_window: 'today', fit_questions: 'today', intro_material: 'within 3 days' };\nreturn [{ json: { ...row, row, eventId, contactKey: contact.toLowerCase().replace(/\\s+/g, ''), isIntake: event === 'lead.created' || score === 'pending', isQualified: event === 'lead.qualified', isHot: score === 'hot', isWarm: score === 'warm', isCold: score === 'cold', telegram: { intake, hot, warm, cold, manager: qualified }, followUpTask: { type: row.followUp || 'unrouted', title: followUpTitles[row.followUp] || 'Review lead', dueHint: followUpDue[row.followUp] || 'manual review', status: 'planned', owner: row.managerAlert || 'manager' } } }];"
+      },
+      "notes": "Normalizes webhook body into flat fields so Sheets and Telegram nodes never depend on nested payload paths."
+    },
+    {
+      "name": "Duplicate Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 220],
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.skillbridgeSeenEvents = store.skillbridgeSeenEvents || {};\nconst key = $json.eventId;\nconst seenAt = store.skillbridgeSeenEvents[key];\nconst isDuplicate = Boolean(seenAt);\nif (!isDuplicate) store.skillbridgeSeenEvents[key] = new Date().toISOString();\nreturn [{ json: { ...$json, isDuplicate, duplicateSeenAt: seenAt || '' } }];"
+      },
+      "notes": "Local/demo duplicate protection. For real deployment, replace with CRM/Data Store lookup by eventId."
+    },
+    {
+      "name": "Is Duplicate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 220],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.isDuplicate}}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Skip Duplicate",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1480, 80],
+      "parameters": {},
+      "notes": "Duplicate event was accepted but not written or notified."
+    },
+    {
+      "name": "Append Google Sheets Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1480, 300],
+      "parameters": {
+        "operation": "append",
+        "sheetName": "Leads",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event": "={{$json.row.event}}",
+            "eventId": "={{$json.row.eventId}}",
+            "emittedAt": "={{$json.row.emittedAt}}",
+            "createdAt": "={{$json.row.createdAt}}",
+            "qualifiedAt": "={{$json.row.qualifiedAt}}",
+            "name": "={{$json.row.name}}",
+            "school": "={{$json.row.school}}",
+            "contact": "={{$json.row.contact}}",
+            "need": "={{$json.row.need}}",
+            "goal": "={{$json.row.goal}}",
+            "level": "={{$json.row.level}}",
+            "start": "={{$json.row.start}}",
+            "format": "={{$json.row.format}}",
+            "budget": "={{$json.row.budget}}",
+            "contactTime": "={{$json.row.contactTime}}",
+            "score": "={{$json.row.score}}",
+            "points": "={{$json.row.points}}",
+            "status": "={{$json.row.status}}",
+            "nextAction": "={{$json.row.nextAction}}",
+            "source": "={{$json.row.source}}",
+            "managerAlert": "={{$json.row.managerAlert}}",
+            "followUp": "={{$json.row.followUp}}",
+            "ragSources": "={{$json.row.ragSources}}"
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Fill Document and Sheet credentials after import. Keep retry enabled for Google API timeouts."
+    },
+    {
+      "name": "Is Intake",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1760, 300],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.isIntake}}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Notify Intake",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [2040, 120],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{$env.ADMIN_CHAT_ID}}",
+        "text": "={{$json.telegram.intake}}"
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Optional: remove this node if intake alerts are too noisy."
+    },
+    {
+      "name": "Wait For Qualification Follow-up",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2320, 120],
+      "parameters": {
+        "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'waiting', action: 'The Telegram bot should collect goal, level, start, format, budget, and contact time.' } } }];"
+      }
+    },
+    {
+      "name": "Is Hot",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2040, 440],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.isHot}}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Notify Hot Manager",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [2320, 300],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{$env.HOT_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "text": "={{$json.telegram.hot}}"
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "name": "Create Call Window Follow-up",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2600, 300],
+      "parameters": {
+        "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Offer nearest call slots and mark the lead as call-first.' } } }];"
+      }
+    },
+    {
+      "name": "Is Warm",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2320, 560],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.isWarm}}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Notify Warm Manager",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [2600, 500],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{$env.WARM_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "text": "={{$json.telegram.warm}}"
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "name": "Create Fit Questions Follow-up",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 500],
+      "parameters": {
+        "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Send fit questions today and clarify decision timing.' } } }];"
+      }
+    },
+    {
+      "name": "Notify Cold Manager",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [2600, 700],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{$env.COLD_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "text": "={{$json.telegram.cold}}"
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "name": "Create Nurture Follow-up",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 700],
+      "parameters": {
+        "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Send intro material and add the lead to nurture.' } } }];"
+      }
+    },
+    {
+      "name": "Drop Unauthorized",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [660, 480],
+      "parameters": {},
+      "notes": "Secret mismatch. The webhook accepted the HTTP request quickly, but the workflow stops here."
+    }
+  ],
+  "connections": {
+    "Lead Event Webhook": {
+      "main": [[{ "node": "Validate Secret", "type": "main", "index": 0 }]]
+    },
+    "Validate Secret": {
+      "main": [
+        [{ "node": "Prepare CRM Row", "type": "main", "index": 0 }],
+        [{ "node": "Drop Unauthorized", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare CRM Row": {
+      "main": [[{ "node": "Duplicate Guard", "type": "main", "index": 0 }]]
+    },
+    "Duplicate Guard": {
+      "main": [[{ "node": "Is Duplicate", "type": "main", "index": 0 }]]
+    },
+    "Is Duplicate": {
+      "main": [
+        [{ "node": "Skip Duplicate", "type": "main", "index": 0 }],
+        [
+          { "node": "Append Google Sheets Row", "type": "main", "index": 0 },
+          { "node": "Is Intake", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Is Intake": {
+      "main": [
+        [{ "node": "Notify Intake", "type": "main", "index": 0 }],
+        [{ "node": "Is Hot", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Intake": {
+      "main": [[{ "node": "Wait For Qualification Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Is Hot": {
+      "main": [
+        [{ "node": "Notify Hot Manager", "type": "main", "index": 0 }],
+        [{ "node": "Is Warm", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Hot Manager": {
+      "main": [[{ "node": "Create Call Window Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Is Warm": {
+      "main": [
+        [{ "node": "Notify Warm Manager", "type": "main", "index": 0 }],
+        [{ "node": "Notify Cold Manager", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Warm Manager": {
+      "main": [[{ "node": "Create Fit Questions Follow-up", "type": "main", "index": 0 }]]
+    },
+    "Notify Cold Manager": {
+      "main": [[{ "node": "Create Nurture Follow-up", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  }
+}

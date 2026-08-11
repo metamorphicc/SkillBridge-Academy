@@ -7,6 +7,8 @@ Production target: Google Sheets with the same columns.
 | Column | Meaning |
 | --- | --- |
 | `event` | `lead.created` for landing intake, `lead.qualified` after bot qualification |
+| `eventId` | Stable event key used by n8n duplicate protection |
+| `emittedAt` | ISO timestamp when the app emitted the webhook event |
 | `createdAt` | ISO timestamp when lead entered the system |
 | `qualifiedAt` | ISO timestamp when the bot qualification completed |
 | `name` | Lead name |

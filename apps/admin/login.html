@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="SkillBridge manager login." />
+    <title>SkillBridge Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/apps/admin/login.css" />
+  </head>
+  <body>
+    <main class="login-shell">
+      <form class="login-card" id="login-form" aria-describedby="login-status">
+        <a class="brand" href="../landing/" aria-label="SkillBridge landing">
+          <span class="brand__mark">SB</span>
+          <span>SkillBridge</span>
+        </a>
+        <div>
+          <p class="eyebrow">Manager access</p>
+          <h1>Admin login</h1>
+        </div>
+        <label>
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required autofocus />
+        </label>
+        <button type="submit">Open dashboard</button>
+        <p class="status" id="login-status" role="status"></p>
+      </form>
+    </main>
+    <script src="/apps/admin/login.js"></script>
+  </body>
+</html>

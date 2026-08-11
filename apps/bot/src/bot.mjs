@@ -76,6 +76,8 @@ async function finalizeLead(config, lead) {
   const payload = buildN8nPayload(lead, scoring, rag.sources, "lead.qualified", { qualifiedAt });
   await appendLead(lead, scoring, {
     event: payload.event,
+    eventId: payload.eventId,
+    emittedAt: payload.emittedAt,
     routing: payload.routing,
     ragSources: rag.sources,
     qualifiedAt,
@@ -131,6 +133,8 @@ export async function createLeadFromLanding(config, input) {
 
   await appendLead(lead, scoring, {
     event: payload.event,
+    eventId: payload.eventId,
+    emittedAt: payload.emittedAt,
     routing: payload.routing,
     ragSources: rag.sources,
   });
