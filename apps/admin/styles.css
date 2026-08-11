@@ -1,5 +1,7 @@
 @import "../../tokens.css";
 
+/* Hallmark · admin workbench · dense CRM layout · anchor hue: cyan */
+
 * {
   box-sizing: border-box;
 }
@@ -9,6 +11,7 @@ html {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
+  overflow-x: clip;
 }
 
 body {
@@ -17,6 +20,7 @@ body {
   background:
     linear-gradient(180deg, oklch(99% 0.01 78 / 0.7), transparent 18rem),
     var(--color-paper);
+  overflow-x: clip;
 }
 
 button,
@@ -31,9 +35,9 @@ button {
 }
 
 .shell {
-  width: min(100% - 2rem, 78rem);
+  width: min(100% - 1.25rem, 112rem);
   margin: 0 auto;
-  padding: var(--space-md) 0 var(--space-2xl);
+  padding: var(--space-sm) 0 var(--space-lg);
 }
 
 .topbar,
@@ -51,10 +55,10 @@ button {
 
 .topbar {
   position: sticky;
-  top: var(--space-sm);
-  z-index: 5;
+  top: 0.5rem;
+  z-index: 10;
   justify-content: space-between;
-  min-height: 3.5rem;
+  min-height: 3.25rem;
   padding: var(--space-xs);
   border: var(--rule-bold) solid var(--color-rule);
   border-radius: var(--radius-card);
@@ -118,7 +122,7 @@ button {
 .hero {
   justify-content: space-between;
   gap: var(--space-lg);
-  padding: var(--space-xl) 0 var(--space-lg);
+  padding: var(--space-lg) 0 var(--space-md);
 }
 
 .eyebrow {
@@ -138,7 +142,7 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(2.2rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, 4.3vw, 4rem);
   line-height: 0.94;
   letter-spacing: 0;
 }
@@ -152,8 +156,8 @@ h2 {
 .hero__note {
   display: grid;
   gap: var(--space-2xs);
-  min-width: 12rem;
-  padding: var(--space-md);
+  min-width: 11rem;
+  padding: var(--space-sm);
   border: var(--rule-bold) solid var(--color-rule);
   border-radius: var(--radius-card);
   background: var(--color-surface);
@@ -161,11 +165,13 @@ h2 {
 }
 
 .hero__note span,
-.hero__note b {
+.hero__note b,
+.hero__note small {
   display: block;
 }
 
-.hero__note span {
+.hero__note span,
+.hero__note small {
   color: var(--color-muted);
   font-size: var(--text-sm);
 }
@@ -177,7 +183,7 @@ h2 {
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .metrics article,
@@ -192,8 +198,8 @@ h2 {
 .metrics article {
   display: grid;
   gap: var(--space-2xs);
-  min-height: 8.25rem;
-  padding: var(--space-md);
+  min-height: 6.75rem;
+  padding: var(--space-sm);
 }
 
 .metrics span,
@@ -209,31 +215,40 @@ h2 {
 .ops-grid {
   align-items: start;
   display: grid;
-  grid-template-columns: minmax(15rem, 0.34fr) minmax(0, 1fr) minmax(19rem, 0.42fr);
-  gap: var(--space-lg);
-  margin-top: var(--space-lg);
+  grid-template-columns: clamp(12rem, 14vw, 15rem) minmax(32rem, 1fr) clamp(26rem, 31vw, 34rem);
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
 }
 
 .queue-panel,
 .table-panel,
 .detail-panel {
   min-width: 0;
-  padding: var(--space-md);
+  padding: var(--space-sm);
 }
 
 .detail-panel {
   position: sticky;
-  top: 6rem;
+  top: 4.25rem;
+  max-height: calc(100vh - 5rem);
+  overflow: auto;
   border: var(--rule-bold) solid var(--color-rule);
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
+.queue-panel {
+  position: sticky;
+  top: 4.25rem;
+  max-height: calc(100vh - 5rem);
+  overflow: auto;
+}
+
 .panel-head {
   justify-content: space-between;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .panel-head--split {
@@ -247,7 +262,7 @@ h2 {
 
 .filterbar {
   display: grid;
-  grid-template-columns: minmax(8rem, 0.8fr) minmax(9rem, 0.9fr) minmax(12rem, 1.4fr);
+  grid-template-columns: minmax(8rem, 0.75fr) minmax(9rem, 0.85fr) minmax(14rem, 1.5fr);
   gap: var(--space-xs);
   margin-bottom: var(--space-sm);
   padding: var(--space-xs);
@@ -360,15 +375,15 @@ h2 {
 }
 
 .lead-table {
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .lead-table__head,
 .lead-row {
   display: grid;
-  grid-template-columns: minmax(12rem, 1.2fr) minmax(12rem, 1fr) 7rem minmax(15rem, 1.2fr);
+  grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(5.5rem, 0.5fr) minmax(8rem, 0.75fr);
   gap: var(--rule-hairline);
-  min-width: 52rem;
+  min-width: 0;
 }
 
 .lead-table__head {
@@ -381,7 +396,7 @@ h2 {
 
 .lead-table__head span,
 .lead-row > div {
-  padding: var(--space-sm);
+  padding: var(--space-xs);
   border-bottom: var(--rule-hairline) solid var(--color-rule);
 }
 
@@ -437,11 +452,13 @@ h2 {
   display: inline-flex;
   align-items: center;
   min-height: 2rem;
+  max-width: 100%;
   padding: 0 var(--space-sm);
   border: var(--rule-hairline) solid var(--color-rule);
   border-radius: var(--radius-pill);
   background: var(--color-paper);
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .stage-pill[data-stage="new"],
@@ -468,7 +485,7 @@ h2 {
 
 .lead-detail {
   display: grid;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .profile-head {
@@ -476,7 +493,7 @@ h2 {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
-  padding-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
   border-bottom: var(--rule-hairline) solid var(--color-rule);
 }
 
@@ -486,7 +503,7 @@ h2 {
 }
 
 .profile-head h3 {
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   line-height: 1.05;
 }
 
@@ -506,11 +523,15 @@ h2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.answer-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .profile-grid div,
 .answer-list div,
 .next-box {
   min-width: 0;
-  padding: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
   border: var(--rule-hairline) solid var(--color-rule);
   border-radius: var(--radius-input);
   background: var(--color-paper);
@@ -540,19 +561,20 @@ h2 {
 
 .status-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-xs);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2xs);
 }
 
 .status-btn,
 .save-btn {
-  min-height: 2.65rem;
+  min-height: 2.25rem;
   border: var(--rule-hairline) solid var(--color-rule);
   border-radius: var(--radius-input);
   background: var(--color-paper);
   color: var(--color-ink);
   cursor: pointer;
   font-weight: 800;
+  font-size: var(--text-sm);
 }
 
 .status-btn:hover,
@@ -608,7 +630,9 @@ h2 {
   .metrics,
   .ops-grid,
   .filterbar,
-  .profile-grid {
+  .profile-grid,
+  .answer-list,
+  .status-actions {
     grid-template-columns: 1fr;
   }
 
@@ -618,5 +642,17 @@ h2 {
 
   .hero__note {
     min-width: 0;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1180px) {
+  .ops-grid {
+    grid-template-columns: minmax(12rem, 0.32fr) minmax(0, 1fr);
+  }
+
+  .detail-panel {
+    position: static;
+    grid-column: 1 / -1;
+    max-height: none;
   }
 }

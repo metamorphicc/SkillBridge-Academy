@@ -174,9 +174,11 @@
     if (!target) return;
     const lead = state.leads.find((item) => leadId(item) === state.selectedId);
     if (!lead) {
+      setText("detail-title", "Select a lead");
       target.innerHTML = '<p class="empty">Choose a row to see answers, next action, and manager controls.</p>';
       return;
     }
+    setText("detail-title", "Lead profile");
 
     const answers = lead.answers || {};
     const stage = pipelineStatus(lead);
