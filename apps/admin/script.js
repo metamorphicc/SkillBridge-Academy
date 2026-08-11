@@ -5,7 +5,6 @@
     filter: "all",
     statusFilter: "all",
     followFilter: "all",
-    routeFilter: "active",
     search: "",
     selectedId: null,
   };
@@ -15,7 +14,6 @@
     call_window: "Call window",
     fit_questions: "Fit questions",
     intro_material: "Nurture material",
-    unrouted: "Unrouted",
   };
 
   const statusLabels = {
@@ -58,6 +56,7 @@
   const leadId = (lead) => String(lead.eventId || lead.id || "");
   const pipelineStatus = (lead) => lead.pipelineStatus || (lead.status === "intake" || lead.score === "pending" ? "needs_qualification" : "new");
   const followRoute = (lead) => lead.followUp || lead.routing?.followUp || "unrouted";
+  const routeLabel = (route) => labels[route] || "No route";
 
   const escapeHtml = (value) =>
     String(value ?? "")
@@ -83,7 +82,7 @@
     if (!list) return;
     const followUps = state.stats?.followUps || {};
     const entries = Object.entries(followUps)
-      .filter(([key]) => state.routeFilter === "all" || key !== "unrouted")
+      .filter(([key]) => key !== "unrouted")
       .sort((a, b) => b[1] - a[1]);
 
     if (entries.length === 0) {
@@ -97,7 +96,7 @@
           <div class="queue-item">
             <div>
               <b>${labels[key] || key}</b>
-              <span>${key}</span>
+              <span>${labels[key] || key}</span>
             </div>
             <strong>${count}</strong>
           </div>
@@ -160,7 +159,7 @@
             </div>
             <div role="cell">
               <span class="stage-pill" data-stage="${escapeHtml(stage)}">${escapeHtml(statusLabels[stage] || stage)}</span>
-              <small>${escapeHtml(clean(followRoute(lead), "No route"))}</small>
+              <small>${escapeHtml(routeLabel(followRoute(lead)))}</small>
             </div>
           </button>
         `;
@@ -201,7 +200,7 @@
       </div>
       <dl class="profile-grid">
         <div><dt>Contact</dt><dd>${escapeHtml(clean(lead.contact, "No contact"))}</dd></div>
-        <div><dt>Route</dt><dd>${escapeHtml(clean(followRoute(lead), "No route"))}</dd></div>
+        <div><dt>Route</dt><dd>${escapeHtml(routeLabel(followRoute(lead)))}</dd></div>
         <div><dt>Source</dt><dd>${escapeHtml(clean(lead.source, "No source"))}</dd></div>
         <div><dt>Created</dt><dd>${escapeHtml(formatDate(lead.createdAt))}</dd></div>
       </dl>
@@ -267,15 +266,6 @@
       button.classList.add("is-active");
       state.filter = button.dataset.filter || "all";
       render();
-    });
-  });
-
-  document.querySelectorAll(".mini-tab").forEach((button) => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".mini-tab").forEach((tab) => tab.classList.remove("is-active"));
-      button.classList.add("is-active");
-      state.routeFilter = button.dataset.routeFilter || "active";
-      renderQueues();
     });
   });
 

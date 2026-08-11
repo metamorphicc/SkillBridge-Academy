@@ -94,8 +94,7 @@ button {
 }
 
 .icon-btn,
-.tab,
-.mini-tab {
+.tab {
   min-height: 2.25rem;
   border: var(--rule-hairline) solid var(--color-rule);
   border-radius: var(--radius-input);
@@ -111,9 +110,7 @@ button {
 
 .icon-btn:hover,
 .tab:hover,
-.tab.is-active,
-.mini-tab:hover,
-.mini-tab.is-active {
+.tab.is-active {
   border-color: var(--color-accent-deep);
   background: var(--tint-accent);
   color: var(--color-accent-deep);
@@ -316,24 +313,9 @@ h2 {
   box-shadow: 0 0 0 3px var(--tint-accent);
 }
 
-.mini-tabs {
-  display: inline-flex;
-  gap: var(--space-2xs);
-  padding: var(--space-2xs);
-  border: var(--rule-hairline) solid var(--color-rule);
-  border-radius: var(--radius-input);
-  background: var(--color-paper);
-}
-
 .tab {
   padding: 0 var(--space-sm);
   font-size: var(--text-sm);
-}
-
-.mini-tab {
-  min-height: 1.9rem;
-  padding: 0 var(--space-xs);
-  font-size: var(--text-xs);
 }
 
 .queue-list {
