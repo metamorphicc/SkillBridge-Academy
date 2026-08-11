@@ -41,10 +41,18 @@ function canGoBack(lead) {
   return QUALIFICATION_STEPS.some((step) => lead.answers?.[step.key]);
 }
 
+function isAllowedQuestionAnswer(question, text) {
+  return question?.quickReplies?.includes(text);
+}
+
 async function cleanupActivePrompt(config, chatId, lead, userMessageId) {
   await deleteMessage(config, chatId, lead?.ui?.promptMessageId);
+  await deleteMessage(config, chatId, lead?.ui?.validationMessageId);
   await deleteMessage(config, chatId, userMessageId);
-  if (lead?.ui) lead.ui.promptMessageId = null;
+  if (lead?.ui) {
+    lead.ui.promptMessageId = null;
+    lead.ui.validationMessageId = null;
+  }
 }
 
 async function askQuestion(config, chatId, lead, question, intro = "") {
@@ -59,6 +67,19 @@ async function askQuestion(config, chatId, lead, question, intro = "") {
   lead.ui = { ...(lead.ui || {}), promptMessageId: messageId };
   await saveSession(chatId, lead);
   return message;
+}
+
+async function rejectInvalidAnswer(config, chatId, lead, question, userMessageId) {
+  await deleteMessage(config, chatId, userMessageId);
+  await deleteMessage(config, chatId, lead?.ui?.validationMessageId);
+  const message = await sendMessage(
+    config,
+    chatId,
+    "Please choose one of the options below.",
+    makeReplyMarkup(question, { canGoBack: canGoBack(lead) }),
+  );
+  lead.ui = { ...(lead.ui || {}), validationMessageId: message?.result?.message_id || null };
+  await saveSession(chatId, lead);
 }
 
 async function resetConversation(config, chatId, lead, userMessageId) {
@@ -247,6 +268,11 @@ export async function handleTelegramUpdate(config, update) {
       remove_keyboard: true,
     });
     return { ok: true, completed: true, result };
+  }
+
+  if (!isAllowedQuestionAnswer(question, text)) {
+    await rejectInvalidAnswer(config, chatId, lead, question, userMessageId);
+    return { ok: false, invalidAnswer: true, question: question.key };
   }
 
   await cleanupActivePrompt(config, chatId, lead, userMessageId);

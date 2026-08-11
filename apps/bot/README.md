@@ -18,6 +18,7 @@ Lead qualification bot for the SkillBridge Academy automation case.
 - Qualified lead score after bot answers: `hot`, `warm`, or `cold`
 - Chat cleanup: active prompts and recent user answers are deleted best-effort
 - `Back` keyboard control lets the lead revise the previous answer
+- During qualification, only reply-keyboard options are accepted as answers
 - Final user message shows the selected answers, priority score, and next action
 - Local CRM fallback: `crm/leads.local.csv` and `crm/leads.local.json`
 - Manager Telegram alert fallback when `ADMIN_CHAT_ID` is configured and n8n is not

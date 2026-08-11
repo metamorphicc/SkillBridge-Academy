@@ -16,6 +16,7 @@ const chat = {
 const updates = [
   "/reset",
   "/start",
+  "random text",
   "Change career",
   "Beginner",
   "Within 7 days",
