@@ -40,17 +40,11 @@ export function formatIntakeAlert(lead) {
   ].join("\n");
 }
 
-export function formatClientReply(scoring) {
-  if (scoring.score === "hot") {
-    return "Thanks. I have enough context to route this as a priority request. A manager should contact you with available call slots.";
-  }
-  if (scoring.score === "warm") {
-    return "Thanks. I saved the request and will pass the context to the manager. They may clarify timing and format before suggesting next steps.";
-  }
-  return "Thanks. I saved the request. I will send helpful intro material first, then the team can follow up when the timing is clearer.";
+export function formatClientReply() {
+  return "Thanks. I saved your answers. A manager will review the request and contact you with the next steps.";
 }
 
-export function formatLeadSummary(lead, scoring) {
+export function formatLeadSummary(lead) {
   const answers = lead.answers || {};
   return [
     "Qualification complete.",
@@ -62,9 +56,6 @@ export function formatLeadSummary(lead, scoring) {
     `Format: ${escapeHtml(answers.format || "Not answered")}`,
     `Budget: ${escapeHtml(answers.budget || "Not answered")}`,
     `Contact time: ${escapeHtml(answers.contactTime || "Not answered")}`,
-    "",
-    `<b>Priority</b>: ${escapeHtml(scoring.score.toUpperCase())} (${scoring.points}/100)`,
-    `Next action: ${escapeHtml(scoring.nextAction)}`,
   ].join("\n");
 }
 
