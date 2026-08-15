@@ -24,7 +24,7 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{$headers['x-skillbridge-secret']}}",
+              "value1": "={{$json.headers['x-skillbridge-secret']}}",
               "operation": "equals",
               "value2": "skillbridge-local-secret"
             }
