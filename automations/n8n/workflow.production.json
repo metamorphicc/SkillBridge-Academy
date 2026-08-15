@@ -127,14 +127,16 @@
       "position": [1760, 300],
       "parameters": {
         "conditions": {
-          "boolean": [
+          "string": [
             {
-              "value1": "={{$json.isIntake}}",
-              "value2": true
+              "value1": "={{$json.event}}",
+              "operation": "equals",
+              "value2": "lead.created"
             }
           ]
         }
-      }
+      },
+      "notes": "True is fallback raw intake. False is the main qualified web-chat flow."
     },
     {
       "name": "Notify Intake",
@@ -182,10 +184,11 @@
       "position": [2320, 440],
       "parameters": {
         "conditions": {
-          "boolean": [
+          "string": [
             {
-              "value1": "={{$json.isHot}}",
-              "value2": true
+              "value1": "={{$json.score}}",
+              "operation": "equals",
+              "value2": "hot"
             }
           ]
         }
@@ -221,10 +224,11 @@
       "position": [2600, 560],
       "parameters": {
         "conditions": {
-          "boolean": [
+          "string": [
             {
-              "value1": "={{$json.isWarm}}",
-              "value2": true
+              "value1": "={{$json.score}}",
+              "operation": "equals",
+              "value2": "warm"
             }
           ]
         }
