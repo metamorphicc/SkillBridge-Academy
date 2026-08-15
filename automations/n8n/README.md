@@ -2,14 +2,14 @@
 
 This folder contains the automation layer for the SkillBridge Academy case:
 
-Landing form -> n8n -> Google Sheets -> Telegram manager routing -> follow-up task.
+Landing form -> web qualification -> n8n -> Google Sheets -> admin summary -> Telegram manager routing -> follow-up task.
 
 ## Files
 
 - `workflow.production.json` - import this workflow for the full pipeline.
 - `workflow.stub.json` - smaller starter/reference workflow.
 - `lead-created.contract.json` - intake payload emitted after the landing form.
-- `lead-qualified.contract.json` - qualified payload emitted after the Telegram bot finishes.
+- `lead-qualified.contract.json` - qualified payload emitted after the web chat or Telegram bot finishes.
 
 ## Production Workflow
 
@@ -39,6 +39,7 @@ Import `workflow.production.json` in n8n, then configure:
 
 ```text
 Notify Intake: PASTE_ADMIN_CHAT_ID
+Notify Admin Summary: PASTE_ADMIN_CHAT_ID
 Notify Hot Manager: PASTE_HOT_MANAGER_CHAT_ID
 Notify Warm Manager: PASTE_WARM_MANAGER_CHAT_ID
 Notify Cold Manager: PASTE_COLD_MANAGER_CHAT_ID
@@ -74,15 +75,15 @@ event	eventId	emittedAt	createdAt	qualifiedAt	name	school	contact	need	goal	leve
 
 The workflow appends both events:
 
-- `lead.created` from the landing form with `score=pending`.
-- `lead.qualified` from the Telegram bot with `score=hot`, `warm`, or `cold`.
+- `lead.qualified` from the main landing web-chat flow with `score=hot`, `warm`, or `cold`.
+- `lead.created` from the fallback intake endpoint with `score=pending`.
 
 ## Payload Normalization
 
 `Prepare CRM Row` is the key node. It flattens webhook payloads into:
 
 - `row.*` fields for Google Sheets.
-- `telegram.*` messages for manager alerts.
+- `telegram.*` messages for admin summaries and manager alerts.
 - `isIntake`, `isHot`, `isWarm`, `isCold` booleans for routing.
 - `followUpTask` for the next workflow step.
 
@@ -111,7 +112,8 @@ This is intentional: if Google Sheets times out, manager alerts are not blocked.
 
 Routing rules:
 
-- Intake -> `Notify Intake` -> `Wait For Qualification Follow-up`.
+- Intake fallback -> `Notify Intake` -> `Wait For Qualification Follow-up`.
+- Qualified -> `Notify Admin Summary` -> Hot/Warm/Cold routing.
 - Hot -> `Notify Hot Manager` -> `Create Call Window Follow-up`.
 - Warm -> `Notify Warm Manager` -> `Create Fit Questions Follow-up`.
 - Cold -> `Notify Cold Manager` -> `Create Nurture Follow-up`.
@@ -139,10 +141,10 @@ This protects the demo from temporary `ETIMEDOUT` errors from Google APIs.
 1. Publish the workflow.
 2. Copy the Production URL into `N8N_LEAD_WEBHOOK_URL`.
 3. Restart the dev server.
-4. Submit the landing form.
-5. Expected: one `lead.created` row, one intake alert.
-6. Finish the Telegram bot questions.
-7. Expected: one `lead.qualified` row, one Hot/Warm/Cold manager alert, one follow-up task output.
+4. Submit the landing form and finish the web qualification chat.
+5. Expected: one `lead.qualified` row.
+6. Expected: one admin summary plus one Hot/Warm/Cold manager alert.
+7. Expected: one follow-up task output.
 
 If test URL works but production URL does nothing, the workflow is not published
 or the app still has `/webhook-test/...` in `.env`.

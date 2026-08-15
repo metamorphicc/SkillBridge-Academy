@@ -54,7 +54,7 @@
       "notes": "Local/demo duplicate protection. For real deployment, replace with CRM/Data Store lookup by eventId."
     },
     {
-      "name": "Is Duplicate",
+      "name": "Is New Event",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [1200, 220],
@@ -62,12 +62,13 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{$json.isDuplicate}}",
+              "value1": "={{!$json.isDuplicate}}",
               "value2": true
             }
           ]
         }
-      }
+      },
+      "notes": "True means this event has not been processed yet and should continue. False means duplicate and should be skipped."
     },
     {
       "name": "Skip Duplicate",
@@ -160,10 +161,25 @@
       }
     },
     {
+      "name": "Notify Admin Summary",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [2040, 440],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "PASTE_ADMIN_CHAT_ID",
+        "text": "={{$json.telegram.manager}}"
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Admin/stat notification after qualification. Keep separate from Hot/Warm/Cold manager chats if you do not want duplicate messages."
+    },
+    {
       "name": "Is Hot",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [2040, 440],
+      "position": [2320, 440],
       "parameters": {
         "conditions": {
           "boolean": [
@@ -179,7 +195,7 @@
       "name": "Notify Hot Manager",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [2320, 300],
+      "position": [2600, 300],
       "parameters": {
         "operation": "sendMessage",
         "chatId": "PASTE_HOT_MANAGER_CHAT_ID",
@@ -193,7 +209,7 @@
       "name": "Create Call Window Follow-up",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2600, 300],
+      "position": [2880, 300],
       "parameters": {
         "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Offer nearest call slots and mark the lead as call-first.' } } }];"
       }
@@ -202,7 +218,7 @@
       "name": "Is Warm",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [2320, 560],
+      "position": [2600, 560],
       "parameters": {
         "conditions": {
           "boolean": [
@@ -218,7 +234,7 @@
       "name": "Notify Warm Manager",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [2600, 500],
+      "position": [2880, 500],
       "parameters": {
         "operation": "sendMessage",
         "chatId": "PASTE_WARM_MANAGER_CHAT_ID",
@@ -232,7 +248,7 @@
       "name": "Create Fit Questions Follow-up",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2880, 500],
+      "position": [3160, 500],
       "parameters": {
         "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Send fit questions today and clarify decision timing.' } } }];"
       }
@@ -241,7 +257,7 @@
       "name": "Notify Cold Manager",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [2600, 700],
+      "position": [2880, 700],
       "parameters": {
         "operation": "sendMessage",
         "chatId": "PASTE_COLD_MANAGER_CHAT_ID",
@@ -255,7 +271,7 @@
       "name": "Create Nurture Follow-up",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2880, 700],
+      "position": [3160, 700],
       "parameters": {
         "jsCode": "return [{ json: { ...$json, followUpTask: { ...$json.followUpTask, status: 'ready', action: 'Send intro material and add the lead to nurture.' } } }];"
       }
@@ -283,21 +299,24 @@
       "main": [[{ "node": "Duplicate Guard", "type": "main", "index": 0 }]]
     },
     "Duplicate Guard": {
-      "main": [[{ "node": "Is Duplicate", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Is New Event", "type": "main", "index": 0 }]]
     },
-    "Is Duplicate": {
+    "Is New Event": {
       "main": [
-        [{ "node": "Skip Duplicate", "type": "main", "index": 0 }],
         [
           { "node": "Append Google Sheets Row", "type": "main", "index": 0 },
           { "node": "Is Intake", "type": "main", "index": 0 }
-        ]
+        ],
+        [{ "node": "Skip Duplicate", "type": "main", "index": 0 }]
       ]
     },
     "Is Intake": {
       "main": [
         [{ "node": "Notify Intake", "type": "main", "index": 0 }],
-        [{ "node": "Is Hot", "type": "main", "index": 0 }]
+        [
+          { "node": "Notify Admin Summary", "type": "main", "index": 0 },
+          { "node": "Is Hot", "type": "main", "index": 0 }
+        ]
       ]
     },
     "Notify Intake": {

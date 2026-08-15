@@ -45,6 +45,19 @@ function isAllowedQuestionAnswer(question, text) {
   return question?.quickReplies?.includes(text);
 }
 
+function validateQualificationAnswers(answers = {}) {
+  const errors = [];
+  for (const question of QUALIFICATION_STEPS) {
+    const answer = String(answers[question.key] || "").trim();
+    if (!answer) {
+      errors.push(`${question.key} is required.`);
+    } else if (!question.quickReplies.includes(answer)) {
+      errors.push(`${question.key} must be one of: ${question.quickReplies.join(", ")}.`);
+    }
+  }
+  return errors;
+}
+
 async function cleanupActivePrompt(config, chatId, lead, userMessageId) {
   await deleteMessage(config, chatId, lead?.ui?.promptMessageId);
   await deleteMessage(config, chatId, lead?.ui?.validationMessageId);
@@ -193,6 +206,29 @@ export async function createLeadFromLanding(config, input) {
     deliveries,
     n8n: n8nDelivery,
     nextBotQuestion: "Telegram bot should continue with goal, level, start, format, budget, and contact time.",
+  };
+}
+
+export async function qualifyLeadFromWeb(config, input) {
+  const validation = validateLandingLead(input);
+  const answerErrors = validateQualificationAnswers(input.answers || input);
+  const errors = [...validation.errors, ...answerErrors];
+
+  if (errors.length) {
+    return { ok: false, status: 422, errors };
+  }
+
+  const lead = normalizeLeadFromLanding({
+    ...input,
+    ...(input.answers || {}),
+    source: input.source || "web_qualification",
+  });
+  const result = await finalizeLead(config, lead);
+
+  return {
+    ok: true,
+    status: 201,
+    ...result,
   };
 }
 

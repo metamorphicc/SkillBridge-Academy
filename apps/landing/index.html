@@ -143,11 +143,19 @@
               <dl>
                 <div><dt>Contact</dt><dd id="submit-contact">Not sent</dd></div>
                 <div><dt>Request</dt><dd id="submit-route">Lead qualification</dd></div>
-                <div><dt>Next</dt><dd id="submit-status">We will qualify the lead and prepare the manager brief.</dd></div>
+                <div><dt>Next</dt><dd id="submit-status">Answer the short qualification below.</dd></div>
               </dl>
+              <div class="web-qualifier" id="web-qualifier" hidden>
+                <p class="label">Qualification chat</p>
+                <div class="web-qualifier__top">
+                  <span id="web-qualifier-progress">Question 1 of 6</span>
+                  <button class="btn btn--outline btn--small" type="button" id="web-qualifier-back" hidden>Back</button>
+                </div>
+                <p class="web-qualifier__question" id="web-qualifier-question">What is the student's main learning goal?</p>
+                <div class="web-qualifier__options" id="web-qualifier-options"></div>
+              </div>
               <div class="submit-result__actions">
-                <a class="btn btn--small" href="#qualification">Try qualification</a>
-                <a class="btn btn--outline btn--small" href="#manager">See manager view</a>
+                <a class="btn btn--small" href="#manager">See manager view</a>
               </div>
             </div>
           </form>
@@ -161,7 +169,7 @@
               </li>
               <li>
                 <span>2</span>
-                <div><b>Bot continues</b><small>Goal, level, start date, format, budget.</small></div>
+                <div><b>Web chat continues</b><small>Goal, level, start date, format, budget.</small></div>
               </li>
               <li>
                 <span>3</span>

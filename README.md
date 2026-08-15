@@ -4,12 +4,13 @@ Portfolio case for an online school lead pipeline.
 
 ## Case Idea
 
-A visitor lands on the course page, leaves a request, then a Telegram bot qualifies the lead with a short question flow. The system scores the lead, writes it to CRM, alerts the manager, and schedules a follow-up.
+A visitor lands on the course page, leaves a request, then completes a short web qualification flow. The system scores the lead, writes it to CRM, alerts the right manager in Telegram, and prepares a follow-up.
 
 ## Product Scope
 
 - Landing page for an online course or expert program.
-- Telegram bot that qualifies leads before the manager joins.
+- Web qualification chat that asks the key lead questions before the manager joins.
+- Telegram bot as an optional/alternate qualification channel.
 - RAG knowledge lookup for program, format, budget, and follow-up answers.
 - CRM table in local CSV/JSON fallback now, Google Sheets target for n8n.
 - Manager dashboard for queue stats, follow-up routes, and latest leads.
@@ -19,10 +20,10 @@ A visitor lands on the course page, leaves a request, then a Telegram bot qualif
 ## Target Workflow
 
 1. Visitor submits a form on the landing.
-2. n8n writes `lead.created` to Google Sheets and sends an intake manager alert.
-3. Bot asks goal, level, start date, format, budget, and contact preference.
-4. Lead gets a score: hot, warm, or cold.
-5. n8n writes `lead.qualified` to Google Sheets and routes the manager alert by score.
+2. The web chat asks goal, level, start date, format, budget, and contact preference.
+3. Lead gets a score: hot, warm, or cold.
+4. n8n writes `lead.qualified` to Google Sheets.
+5. n8n sends an admin summary and routes the manager alert by score.
 6. Follow-up route is selected: call window, fit questions, or nurture.
 
 ## Structure

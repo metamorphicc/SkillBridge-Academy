@@ -11,7 +11,8 @@ Returns service status and whether Telegram/n8n env vars are configured.
 
 ### `POST /api/lead`
 
-Accepts landing form submissions.
+Accepts raw landing form submissions. This is kept for fallback/intake tests.
+The main landing now uses `/api/lead/qualify` after the web qualification chat.
 
 ```json
 {
@@ -27,9 +28,35 @@ and attempts n8n webhook delivery if `N8N_LEAD_WEBHOOK_URL` is configured.
 The form submission is an intake event, so its event name is `lead.created`
 and its score is `pending` until the bot collects qualification answers.
 
+### `POST /api/lead/qualify`
+
+Accepts landing form fields plus completed web qualification answers.
+
+```json
+{
+  "name": "Anna Petrova",
+  "school": "Online design academy",
+  "contact": "@anna_demo",
+  "need": "Lead qualification",
+  "answers": {
+    "goal": "Change career",
+    "level": "Beginner",
+    "start": "Within 7 days",
+    "format": "Group",
+    "budget": "Ready to discuss",
+    "contactTime": "Today"
+  }
+}
+```
+
+Creates a scored `lead.qualified` event. This is the production landing path:
+n8n receives the full lead profile, writes the CRM row, sends an admin summary,
+and routes Hot/Warm/Cold manager alerts.
+
 ### `POST /api/telegram`
 
-Receives Telegram webhook updates and runs the 6-question qualification flow.
+Receives Telegram webhook updates and runs the same 6-question qualification flow
+as an alternate channel.
 If `TELEGRAM_WEBHOOK_SECRET` is configured, the request must include
 `X-Telegram-Bot-Api-Secret-Token`.
 When the flow completes, the bot emits `lead.qualified` with a `hot`, `warm`,

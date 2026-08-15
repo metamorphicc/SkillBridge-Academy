@@ -8,7 +8,8 @@ pipeline for online schools.
 - Responsive landing page for the B2B product.
 - Protected manager dashboard with login, filters, lead profile, manager notes,
   owner field, and pipeline status controls.
-- Telegram qualification bot with a short question flow.
+- Web qualification chat with a short question flow.
+- Telegram qualification bot as an alternate channel.
 - Back/reset behavior in the bot.
 - RAG lookup from the local knowledge base.
 - Hot/Warm/Cold lead scoring.
@@ -23,10 +24,10 @@ pipeline for online schools.
 
 1. Open the landing page.
 2. Submit a lead request.
-3. Show the intake row or intake alert.
-4. Open Telegram and finish the bot qualification.
-5. Show the final score and answer summary in Telegram.
-6. Show the Google Sheets row from n8n.
+3. Finish the web qualification chat.
+4. Show the `lead.qualified` execution in n8n.
+5. Show the Google Sheets row from n8n.
+6. Show the admin summary.
 7. Show the manager alert routed by Hot/Warm/Cold.
 8. Open the protected dashboard.
 9. Filter the queue and select the lead.
@@ -105,6 +106,9 @@ Then configure:
 Use `/webhook-test/...` only while manually listening for test events. Use
 `/webhook/...` after publishing the workflow.
 
+The main landing flow sends `lead.qualified` after the web chat is complete.
+`lead.created` remains available for fallback intake tests.
+
 ## Manual Parts
 
 These are intentionally left as integration wiring, not app code:
@@ -120,7 +124,8 @@ These are intentionally left as integration wiring, not app code:
 This is not just a landing page. The case demonstrates:
 
 - Lead intake.
-- Bot qualification.
+- Web qualification.
+- Optional bot qualification.
 - Structured scoring.
 - CRM hygiene.
 - Manager routing.

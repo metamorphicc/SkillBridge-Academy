@@ -1,6 +1,6 @@
 import { getConfig } from "./config.mjs";
 import { clearAdminCookie, createAdminCookie, isAdminAuthenticated, isAdminPasswordValid } from "./admin-auth.mjs";
-import { createLeadFromLanding, handleTelegramUpdate } from "./bot.mjs";
+import { createLeadFromLanding, handleTelegramUpdate, qualifyLeadFromWeb } from "./bot.mjs";
 import { answerWithRag } from "./rag.mjs";
 import { buildLeadStats, listLeads, updateLead } from "./storage.mjs";
 
@@ -87,6 +87,17 @@ export async function handleApiRequest(request, response, config = getConfig()) 
     try {
       const body = await readJsonBody(request);
       const result = await createLeadFromLanding(config, { ...body, source: body.source || "landing_form" });
+      sendJson(response, result.status || 200, result, corsHeaders());
+    } catch (error) {
+      sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
+    }
+    return true;
+  }
+
+  if (url.pathname === "/api/lead/qualify" && request.method === "POST") {
+    try {
+      const body = await readJsonBody(request);
+      const result = await qualifyLeadFromWeb(config, { ...body, source: body.source || "web_qualification" });
       sendJson(response, result.status || 200, result, corsHeaders());
     } catch (error) {
       sendJson(response, 500, { ok: false, error: error.message }, corsHeaders());
