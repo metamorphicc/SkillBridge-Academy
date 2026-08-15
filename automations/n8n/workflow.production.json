@@ -26,12 +26,12 @@
             {
               "value1": "={{$headers['x-skillbridge-secret']}}",
               "operation": "equals",
-              "value2": "={{$env.N8N_WEBHOOK_SECRET || 'skillbridge-local-secret'}}"
+              "value2": "skillbridge-local-secret"
             }
           ]
         }
       },
-      "notes": "Set N8N_WEBHOOK_SECRET in n8n to the same value as the app .env."
+      "notes": "Paste the same secret string here that the app uses in N8N_WEBHOOK_SECRET. This workflow avoids $env because local n8n can deny env access."
     },
     {
       "name": "Prepare CRM Row",
@@ -142,13 +142,13 @@
       "position": [2040, 120],
       "parameters": {
         "operation": "sendMessage",
-        "chatId": "={{$env.ADMIN_CHAT_ID}}",
+        "chatId": "PASTE_ADMIN_CHAT_ID",
         "text": "={{$json.telegram.intake}}"
       },
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
-      "notes": "Optional: remove this node if intake alerts are too noisy."
+      "notes": "Paste the admin/private/group chat ID here. Optional: remove this node if intake alerts are too noisy."
     },
     {
       "name": "Wait For Qualification Follow-up",
@@ -182,7 +182,7 @@
       "position": [2320, 300],
       "parameters": {
         "operation": "sendMessage",
-        "chatId": "={{$env.HOT_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "chatId": "PASTE_HOT_MANAGER_CHAT_ID",
         "text": "={{$json.telegram.hot}}"
       },
       "retryOnFail": true,
@@ -221,7 +221,7 @@
       "position": [2600, 500],
       "parameters": {
         "operation": "sendMessage",
-        "chatId": "={{$env.WARM_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "chatId": "PASTE_WARM_MANAGER_CHAT_ID",
         "text": "={{$json.telegram.warm}}"
       },
       "retryOnFail": true,
@@ -244,7 +244,7 @@
       "position": [2600, 700],
       "parameters": {
         "operation": "sendMessage",
-        "chatId": "={{$env.COLD_MANAGER_CHAT_ID || $env.ADMIN_CHAT_ID}}",
+        "chatId": "PASTE_COLD_MANAGER_CHAT_ID",
         "text": "={{$json.telegram.cold}}"
       },
       "retryOnFail": true,

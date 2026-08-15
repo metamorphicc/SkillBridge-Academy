@@ -22,8 +22,10 @@ Import `workflow.production.json` in n8n, then configure:
    - Use the Production URL only after the workflow is published.
 
 2. `Validate Secret`
-   - Set n8n env `N8N_WEBHOOK_SECRET`.
-   - It must match the app `.env` value.
+   - `value1`: `={{$json.headers["x-skillbridge-secret"]}}`
+   - `value2`: paste the same secret string as the app `.env` `N8N_WEBHOOK_SECRET`.
+   - The imported workflow uses `skillbridge-local-secret` by default.
+   - Do not use `$env` here for the local demo if n8n shows `access to env vars denied`.
 
 3. `Append Google Sheets Row`
    - Select your Google Sheets credentials.
@@ -33,13 +35,13 @@ Import `workflow.production.json` in n8n, then configure:
 
 4. Telegram nodes
    - Select Telegram credentials.
-   - Set chat IDs through n8n env:
+   - Replace the placeholder chat IDs in each Telegram node:
 
 ```text
-ADMIN_CHAT_ID=1825089798
-HOT_MANAGER_CHAT_ID=1825089798
-WARM_MANAGER_CHAT_ID=1825089798
-COLD_MANAGER_CHAT_ID=1825089798
+Notify Intake: PASTE_ADMIN_CHAT_ID
+Notify Hot Manager: PASTE_HOT_MANAGER_CHAT_ID
+Notify Warm Manager: PASTE_WARM_MANAGER_CHAT_ID
+Notify Cold Manager: PASTE_COLD_MANAGER_CHAT_ID
 ```
 
 For a simple demo, all manager chat IDs can be the same. Later, route Hot/Warm/Cold
@@ -57,6 +59,10 @@ N8N_TIMEOUT_MS=2500
 
 Use `/webhook-test/...` only while the n8n webhook node is listening for a test
 event. Use `/webhook/...` after the workflow is published.
+
+Important: the app `.env` is still needed because the app must know where to
+send events and which secret header to include. The n8n workflow itself does not
+need env access in the local setup.
 
 ## Google Sheets Columns
 
@@ -109,6 +115,11 @@ Routing rules:
 - Hot -> `Notify Hot Manager` -> `Create Call Window Follow-up`.
 - Warm -> `Notify Warm Manager` -> `Create Fit Questions Follow-up`.
 - Cold -> `Notify Cold Manager` -> `Create Nurture Follow-up`.
+
+If you do not want intake alerts, disconnect or delete `Notify Intake`. The app
+does not send a direct manager alert when `N8N_LEAD_WEBHOOK_URL` is configured,
+so duplicate Telegram messages usually mean both direct bot alerts and n8n
+alerts are enabled somewhere.
 
 The follow-up nodes currently produce structured task payloads. Replace them
 with Google Calendar, CRM task, Telegram reminder, email, or Make/n8n delay nodes

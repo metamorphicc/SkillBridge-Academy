@@ -77,6 +77,9 @@ WARM_MANAGER_CHAT_ID=
 COLD_MANAGER_CHAT_ID=
 ```
 
+For the local n8n import, paste manager chat IDs directly into the Telegram
+nodes. Some local n8n installs deny `$env` inside node expressions.
+
 ## Google Sheets Headers
 
 ```text
@@ -95,7 +98,8 @@ Then configure:
 
 - Google Sheets credentials and target document.
 - Telegram credentials and manager chat IDs.
-- `N8N_WEBHOOK_SECRET` in n8n.
+- `Validate Secret` value2: paste the same secret string as app `.env`
+  `N8N_WEBHOOK_SECRET`.
 - Published production webhook URL in the app `.env`.
 
 Use `/webhook-test/...` only while manually listening for test events. Use
